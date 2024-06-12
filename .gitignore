@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# PyInstaller output
+build/
+dist/
+*-onedir/
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
+
+# Secrets
+.env
+*.key
