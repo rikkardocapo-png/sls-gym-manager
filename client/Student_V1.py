@@ -1,17 +1,32 @@
+import tkmacosx as btnx
 from tkinter import *
-import tkinter.messagebox as message
-import datetime as mysql
-import Student_Libs as Funcs
-AccID=""
+from Studentapp.V1 import Student_Libs as Funcs
+
 global e_user, e_pass
 loggeduser=("")
 
+# Startup functions
 
+ACCID=1
+
+
+
+
+
+
+
+
+
+#                  !
+#                  !
+# Window functions V - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def openlogin():
-    global SU_window, LG_window
+    global SU_window, LG_window, H_window, B_window
+    PAGES=[SU_window, LG_window, H_window, B_window]
     try:
         SU_window.destroy()
+
     except:
         print("closure failed - 01")
         pass
@@ -118,7 +133,7 @@ def opensignup():
     QuitButton.place(x=30, y=370, width=70, height=25)
 
     Sign_in_Button = Button(SU_window, bg="#efefef", font=('Times', 10), fg="#000000", justify="center",
-                            text="Sign-up", command=lambda: Funcs.signup(str(e_user.get()),str(e_pass.get()),str(e_name.get()),str(e_sur.get())))
+                            text="Sign-up", command=lambda: Funcs.signup(str(e_user.get()),str(e_pass.get()),str(e_name.get()),str(e_sur.get()),openlogin))
     Sign_in_Button.place(x=360, y=370, width=180, height=35)
 
     Sign_up_Button = Button(SU_window, bg="#efefef", font=('Times', 10), fg="#000000", justify="center",
@@ -128,7 +143,7 @@ def opensignup():
     SU_window.mainloop()
 
 def openHome(ACCID):
-    global LG_Window, SU_window, loggeduser
+    global LG_Window, SU_window
 
     try:
         LG_window.destroy()
@@ -147,27 +162,27 @@ def openHome(ACCID):
                        text="SLS gym - Home")
     TopLabel.place(x=150 , y=0, width=750, height=75)
 
-    Home_Button = Button(H_window,fg="#ebecf0", bg="#001b5e", font=('Times', 10), justify="center",
+    Home_Button = btnx.Button(H_window,fg="#ebecf0", bg="#001b5e", font=('Times', 10), justify="center",
                             text="Home")
     Home_Button.place(x=0, y=0, width=150, height=75)
 
-    Induction_Button = Button(H_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
+    Induction_Button = btnx.Button(H_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
                          text="Induction")
     Induction_Button.place(x=0, y=75, width=150, height=75)
 
-    Med_Button = Button(H_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
+    Med_Button = btnx.Button(H_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
                               text="Certificate")
     Med_Button.place(x=0, y=150, width=150, height=75)
 
-    TMT_Button = Button(H_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
-                                  text="Bookings")
+    TMT_Button = btnx.Button(H_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
+                                  text="Bookings",command=lambda:openBook(ACCID))
     TMT_Button.place(x=0, y=225, width=150, height=75)
 
-    Contact_Button = Button(H_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
+    Contact_Button = btnx.Button(H_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
                         text="Contact")
     Contact_Button.place(x=0, y=300, width=150, height=75)
 
-    Exit_Button = Button(H_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
+    Exit_Button = btnx.Button(H_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
                             text="Exit",  command=lambda: exit())
     Exit_Button.place(x=0, y=375, width=150, height=75)
 
@@ -194,6 +209,70 @@ def openHome(ACCID):
 
     H_window.mainloop()
 
-openlogin()
+
+def openBook(ACCID):
+    global loggeduser, H_window
+
+    try:
+        H_window.destroy()
+    except:
+        pass
+        print("closure failed - 03")
+
+    B_window = Tk()
+    SpawnX = int((B_window.winfo_screenwidth() / 2)-(900/2))
+    SpawnY = int((B_window.winfo_screenheight() / 2)-(430/2))
+    B_window.geometry(f"900x450+{SpawnX}+{SpawnY}")
+    B_window.title("HOME")
+    B_window.resizable(width=False, height=False)
+
+    TopLabel = Label(B_window, bg="#eb5841", font=('Times', 38), fg="#333333", justify="center",
+                       text="SLS gym - Home")
+    TopLabel.place(x=150 , y=0, width=750, height=75)
+
+    Home_Button = btnx.Button(B_window,fg="#000000", bg="#4277fc", font=('Times', 10), justify="center",
+                            text="Home",command=lambda:openHome(ACCID))
+    Home_Button.place(x=0, y=0, width=150, height=75)
+
+    Induction_Button = btnx.Button(B_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
+                         text="Induction")
+    Induction_Button.place(x=0, y=75, width=150, height=75)
+
+    Med_Button = btnx.Button(B_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
+                              text="Certificate")
+    Med_Button.place(x=0, y=150, width=150, height=75)
+
+    TMT_Button = btnx.Button(B_window, fg="#ebecf0", bg="#001b5e", justify="center",
+                                  text="Bookings", font=('Times', 10))
+    TMT_Button.place(x=0, y=225, width=150, height=75)
+
+    Contact_Button = btnx.Button(B_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
+                        text="Contact")
+    Contact_Button.place(x=0, y=300, width=150, height=75)
+
+    Exit_Button = btnx.Button(B_window, bg="#4277fc", font=('Times', 10), fg="#000000", justify="center",
+                            text="Exit",  command=lambda: exit())
+    Exit_Button.place(x=0, y=375, width=150, height=75)
+
+    Times=[" 14:00-15:00", "15:00- 16:00", "16:00-16:30", "16:45-17:15","17:15-18:00"]
+
+    for i in range(7):
+        TTLabel1 = Label(B_window, bg="#eb5841", font=('Times', 10), fg="#333333", justify="center",
+                       text=Funcs.getday(i))
+        TTLabel1.place(x=(i*75+300),y=(100),width=75,height=50)
+        for o in range(5):
+            if i == 0:
+                TTLabel2 = Label(B_window, bg="#eb5841", font=('Times', 10), fg="#333333", justify="center",
+                                 text=Times[o])
+                TTLabel2.place(x=(225), y=(o*50+150), width=75, height=50)
+
+            TTbutton = btnx.Button(B_window, text=Funcs.getTTstatus(i,o,ACCID)[0], bg=Funcs.getTTstatus(i,o,ACCID)[1])
+            # command=lambda: Funcs.ttopen(i,o))
+            TTbutton.place(x=(i*75+300),y=(o*50+150),width=75,height=50)
 
 
+
+
+    B_window.mainloop()
+
+openBook(1)
