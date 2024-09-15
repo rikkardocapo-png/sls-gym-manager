@@ -1,6 +1,10 @@
 import mysql.connector as mysql
 import tkinter.messagebox as message
 from datetime import datetime, timedelta
+import webbrowser
+import os
+
+
 
 def checkpresent(username):
    connection = mysql.connect(host="localhost",user="sls-modifyer",database="IA User-data",port=8889)
@@ -38,32 +42,6 @@ def findid():
             cursor.close()
             connection.close()
     return biggest_id + 1
-
-"""def login(e_user, e_pass):
-   global loggeduser, AccID
-   username = e_user
-   password = e_pass
-   if e_user == "" or e_pass == "":
-       message.showinfo("Get Status", "Some fields are empty")
-   else:
-       try:
-           connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data",port=8889)
-           cursor = connection.cursor()
-           cursor.execute(f"Select AccID from Users WHERE Email = '{username}' AND Password = '{password}'")
-           cursor.execute("commit")
-           ACCID = cursor.fetchall()
-
-           if ACCID != None:
-               loggeduser = ACCID
-               OpenHome()
-
-
-
-       except mysql.Error as e:
-           message.showinfo("Login status", f"sql error {e}")
-       finally:
-           cursor.close()
-           connection.close()"""
 
 def login(e_user, e_pass,open_home_callback):
     global loggeduser, AccID
@@ -115,12 +93,13 @@ def signup(username, password, name, sur, logincallback):
 def IDtoName(ACCID):
     connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data", port=8889)
     cursor = connection.cursor()
-    cursor.execute(f"SELECT Name FROM Users WHERE AccID = '{ACCID}'")
+    cursor.execute(f"SELECT Name, Surname FROM Users WHERE AccID = {ACCID}")
     result = cursor.fetchone()
-    result = result[0]
+    Name = result[0]
+    Surname = result[1]
     cursor.close()
     connection.close()
-    return result
+    return Name,Surname
 
 def getday(adder):
     today = datetime.today()
@@ -153,25 +132,6 @@ def getTTstatus(i,o,AccID):
 
     return result,colour
 
-def closewindows():
-    global SU_window, LG_window, H_window, B_window
-    try:
-        H_window.destroy()
-    except:
-        pass
-    try:
-        B_window.destroy()
-    except:
-        pass
-    try:
-        LG_window.destroy()
-    except:
-        pass
-    try:
-        SU_window.destroy()
-    except:
-        pass
-
 def MedStatus(AccID):
     connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data", port=8889)
     cursor = connection.cursor()
@@ -185,13 +145,13 @@ def MedStatus(AccID):
     else:
         result=result[0]
         if getday(0) <= result <= getday(14):
-            return f"Expires in {(result-getday(0)).days} days", "yellow"
+            return f"Expires in {(result-getday(0)).days} days", "yellow",True
 
         elif result < getday(0):
-            return "Expired", "red"
+            return "Expired", "red",False
 
         else:
-            return "Submitted", "green"
+            return "Submitted", "green",True
 
 def IndStatus(AccID):
     connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data", port=8889)
@@ -206,43 +166,13 @@ def IndStatus(AccID):
     else:
         return "Completed","green"
 
-"""def TTBTN_press(i,o,AccID,button):
-
-    if checkteacher(AccID) == False and o >= 3:
-        message.showinfo("Teachercheck - Failed", "Error - non teacher accounts cannot access such periods")
-    else:
-
-
-        connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data", port=8889)
-        cursor = connection.cursor()
-        cursor.execute(f"SELECT * FROM Timetable WHERE AccID = '{AccID}' AND Period = '{o}' AND Date = '{getday(i)}'")
-        result = cursor.fetchone()
-        cursor.close()
-        connection.close()
-
-        if result == None:
-            connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data", port=8889)
-            cursor = connection.cursor()
-            cursor.execute(f"INSERT INTO Timetable VALUES ('{getday(i)}','{o}','{AccID}',0)")
-            connection.commit()
-            print("called-none")
-            cursor.close()
-            connection.close()
-        else:
-            connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data", port=8889)
-            cursor = connection.cursor()
-            cursor.execute(f"DELETE FROM Timetable WHERE AccID = '{AccID}' AND Period = '{o}' AND Date = '{getday(i)}'")
-            connection.commit()
-            print("called-present")
-            cursor.close()
-            connection.close()
-
-        new_text, new_bg = Funcs.getTTstatus(i, o, AccID)
-        button.config(text=new_text, bg=new_bg)"""
-
 def TTBTN_press(i, o, AccID, button):
-    if not checkteacher(AccID) and o >= 4:
+    if not checkteacher(AccID) and o >= 3:
         message.showinfo("Teachercheck - Failed", "Error - non teacher accounts cannot access such periods")
+        return
+
+    if not MedStatus(AccID)[2]:
+        message.showinfo("Medcheck - Failed", "Error - certificate expired")
         return
 
     connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data", port=8889)
@@ -273,7 +203,6 @@ def TTBTN_press(i, o, AccID, button):
     new_text, new_bg = getTTstatus(i, o, AccID)
     button.configure(text=new_text, bg=new_bg,anchor="center", justify="center")
 
-
 def checkteacher(AccID):
     connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data", port=8889)
     cursor = connection.cursor()
@@ -286,3 +215,56 @@ def checkteacher(AccID):
         return False
     elif result == 1:
         return True
+
+def sendemail(mail,AccID,ind):
+    if ind==None:
+        name=IDtoName(AccID)[0]
+        surname=IDtoName(AccID)[1]
+        mailto_link = f"mailto:{mail}?subject=Gym%20Manager%20Automated%20Support%20Request&body={name}%20{surname}%20has%20sent%20a%20message:%0A%0A*Include%20message%20here*"
+        webbrowser.open(mailto_link)
+    else:
+        name=IDtoName(AccID)[0]
+        surname=IDtoName(AccID)[1]
+        mailto_link = f"mailto:{mail}?subject=Gym%20Manager%20Automated%20Induction%20Request&body={name}%20{surname}%20wants%20to%20organize%20a%20Induction%20Day%0A%0A*Include%20message%20here*"
+        webbrowser.open(mailto_link)
+
+def select_file():
+    file_path = filedialog.askopenfilename()
+    if file_path:
+        upload_to_sql(file_path)
+
+def upload_to_sql(file_path):
+    try:
+
+        with open(file_path, 'rb') as file:
+            binary_data = file.read()
+
+        connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data", port=8889)
+        cursor = connection.cursor()
+        cursor.execute(f"INSERT INTO Certificates ({AccID,binary_data,expiry,False}")
+        result = cursor.fetchone()[0]
+        cursor.close()
+        connection.close()
+
+        # SQL query to insert BLOB
+        sql_query = "INSERT INTO your_table_name (file_name, file_data) VALUES (%s, %s)"
+        file_name = os.path.basename(file_path)
+        cursor.execute(sql_query, (file_name, binary_data))
+        connection.commit()
+
+        cursor.close()
+        connection.close()
+
+
+        message.showinfo("Success", "File uploaded successfully")
+    except:
+        message.showerror("Error", "An error occurred")
+
+
+def connect(query):
+    connection = mysql.connect(host="localhost", user="sls-modifyer", database="IA User-data", port=8889)
+    cursor = connection.cursor()
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
