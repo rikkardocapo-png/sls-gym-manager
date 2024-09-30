@@ -4,15 +4,9 @@ from tkinter import ttk
 import tkinter.messagebox as message
 from datetime import datetime, timedelta
 import Student_Libs_V2 as Funcs
-import webbrowser
 
 
-
-# Startup functions
-host="localhost"
-port="8889"
-teacheremail=""
-supportemail="rcapobianco@stlouisschoolapps.com"
+# Startup variables
 
 SU_window=None
 LG_window=None
@@ -21,11 +15,9 @@ B_window=None
 C_window=None
 I_window=None
 M_window=None
-ACCID=1
+filepath=None
 
-
-
-
+# Window subroutines
 
 def closewindows(windows):
     for i in range(len(windows)):
@@ -33,10 +25,6 @@ def closewindows(windows):
             windows[i].destroy()
         except:
             pass
-
-#                  !
-#                  !
-# Window functions V - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def openlogin():
     global SU_window, LG_window, H_window, B_window, C_window, I_window
@@ -48,7 +36,7 @@ def openlogin():
     SpawnX = int((LG_window.winfo_screenwidth() / 2)-(900/2))
     SpawnY = int((LG_window.winfo_screenheight() / 2)-(430/2))
     LG_window.geometry(f"900x430+{SpawnX}+{SpawnY}")
-    LG_window.title("LOGIN")
+    LG_window.title("Log-in")
     LG_window.resizable(width=False, height=False)
 
     TitleLabel = Label(LG_window, bg="#eb5841", font=('Times', 38), fg="#333333", justify="center",
@@ -83,10 +71,6 @@ def openlogin():
                             text="Sign-up", command=lambda: opensignup())
     Sign_up_Button.place(x=800, y=370, width=70, height=25)
 
-    Invalid_cred = Label(LG_window,font=('Times', 10), fg="#FF0000", justify="center",text="Invalid credentials")
-    """
-    Invalid_cred.place(x=375, y=340, width=150, height=25)
-    """
     LG_window.mainloop()
 
 def opensignup():
@@ -99,7 +83,7 @@ def opensignup():
     SpawnX = int((SU_window.winfo_screenwidth() / 2)-(900/2))
     SpawnY = int((SU_window.winfo_screenheight() / 2)-(430/2))
     SU_window.geometry(f"900x430+{SpawnX}+{SpawnY}")
-    SU_window.title("SIGNUP")
+    SU_window.title("Sign-up")
     SU_window.resizable(width=False, height=False)
 
     TitleLabel = Label(SU_window, bg="#eb5841", font=('Times', 38), fg="#333333", justify="center",
@@ -162,7 +146,7 @@ def openHome(ACCID):
     SpawnX = int((H_window.winfo_screenwidth() / 2)-(900/2))
     SpawnY = int((H_window.winfo_screenheight() / 2)-(430/2))
     H_window.geometry(f"900x450+{SpawnX}+{SpawnY}")
-    H_window.title("HOME")
+    H_window.title("Home")
     H_window.resizable(width=False, height=False)
 
     TopLabel = Label(H_window, bg="#eb5841", font=('Times', 38), fg="#333333", justify="center",
@@ -226,7 +210,7 @@ def openBook(ACCID):
     SpawnX = int((B_window.winfo_screenwidth() / 2)-(900/2))
     SpawnY = int((B_window.winfo_screenheight() / 2)-(430/2))
     B_window.geometry(f"900x450+{SpawnX}+{SpawnY}")
-    B_window.title("HOME")
+    B_window.title("Bookings")
     B_window.resizable(width=False, height=False)
 
     TopLabel = Label(B_window, bg="#eb5841", font=('Times', 38), fg="#333333", justify="center",
@@ -263,17 +247,25 @@ def openBook(ACCID):
         TTLabel1 = Label(B_window, bg="#eb5841", font=('Times', 10), fg="#333333", justify="center",
                        text=Funcs.getday(i))
         TTLabel1.place(x=(i*75+300),y=(100),width=75,height=50)
-        for o in range(5):
-            if i == 0:
-                TTLabel2 = Label(B_window, bg="#eb5841", font=('Times', 10), fg="#333333", justify="center",
-                                 text=Times[o])
-                TTLabel2.place(x=(225), y=(o*50+150), width=75, height=50)
+        if Funcs.isweekend(str(Funcs.getday(i))) == True:
+            for o in range(5):
+                if i == 0:
+                    TTLabel2 = Label(B_window, bg="#eb5841", font=('Times', 10), fg="#333333", justify="center",
+                                     text=Times[o])
+                    TTLabel2.place(x=(225), y=(o*50+150), width=75, height=50)
 
-            TTbutton = btnx.Button(B_window, text=Funcs.getTTstatus(i,o,ACCID)[0], bg=Funcs.getTTstatus(i,o,ACCID)[1])
-            TTbutton.place(x=(i*75+300),y=(o*50+150),width=75,height=50)
-            TTbutton.configure(command=lambda i=i, o=o,btn=TTbutton: Funcs.TTBTN_press(i, o, ACCID,btn))
+                TTbutton = btnx.Button(B_window, text=Funcs.getTTstatus(i,o,ACCID)[0], bg=Funcs.getTTstatus(i,o,ACCID)[1])
+                TTbutton.place(x=(i*75+300),y=(o*50+150),width=75,height=50)
+                TTbutton.configure(command=lambda i=i, o=o,btn=TTbutton: Funcs.TTBTN_press(i, o, ACCID,btn))
+        else:
+            for o in range(5):
+                if i == 0:
+                    TTLabel2 = Label(B_window, bg="#eb5841", font=('Times', 10), fg="#333333", justify="center",
+                                     text=Times[o])
+                    TTLabel2.place(x=(225), y=(o * 50 + 150), width=75, height=50)
 
-
+                WElabel = Label(B_window,bg="grey")
+                WElabel.place(x=(i * 75 + 300), y=(o * 50 + 150), width=75, height=50)
 
 
     B_window.mainloop()
@@ -288,7 +280,7 @@ def openContact(ACCID):
     SpawnX = int((C_window.winfo_screenwidth() / 2) - (900 / 2))
     SpawnY = int((C_window.winfo_screenheight() / 2) - (430 / 2))
     C_window.geometry(f"900x450+{SpawnX}+{SpawnY}")
-    C_window.title("HOME")
+    C_window.title("Contact")
     C_window.resizable(width=False, height=False)
 
     TopLabel = Label(C_window, bg="#eb5841", font=('Times', 38), fg="#333333", justify="center",
@@ -345,7 +337,7 @@ def openInduction(ACCID):
     SpawnX = int((I_window.winfo_screenwidth() / 2) - (900 / 2))
     SpawnY = int((I_window.winfo_screenheight() / 2) - (430 / 2))
     I_window.geometry(f"900x450+{SpawnX}+{SpawnY}")
-    I_window.title("HOME")
+    I_window.title("Induction")
     I_window.resizable(width=False, height=False)
 
     TopLabel = Label(I_window, bg="#eb5841", font=('Times', 38), fg="#333333", justify="center",
@@ -394,7 +386,7 @@ def openMed(ACCID):
     SpawnX = int((M_window.winfo_screenwidth() / 2) - (900 / 2))
     SpawnY = int((M_window.winfo_screenheight() / 2) - (430 / 2))
     M_window.geometry(f"900x450+{SpawnX}+{SpawnY}")
-    M_window.title("HOME")
+    M_window.title("Certificate")
     M_window.resizable(width=False, height=False)
 
     TopLabel = Label(M_window, bg="#eb5841", font=('Times', 38), fg="#333333", justify="center",
@@ -430,7 +422,7 @@ def openMed(ACCID):
     ScriptLabel.place(x=215, y=100, width=600, height=50)
 
     Select_Button = btnx.Button(M_window, bg="#FFFFFF", font=('Times', 30), fg="#000000", justify="center",
-                              text="Select file", command=lambda: Funcs.sendemail(teacheremail,ACCID,True))
+                              text="Select file", command=lambda: Funcs.select_file(Select_Button))
     Select_Button.place(x=360, y=150, width=300, height=50)
 
     MedTB = Entry(M_window, bg="#FFFFFF", font=('Times', 30), fg="#333333", justify="center",)
@@ -442,8 +434,8 @@ def openMed(ACCID):
     DateLabel.place(x=215, y=225, width=600, height=50)
 
     Upload_Button = btnx.Button(M_window, bg="#FFFFFF", font=('Times', 30), fg="#000000", justify="center",
-                              text="Upload Certificate", command=lambda: Funcs.sendemail(teacheremail,ACCID,True))
+                              text="Upload Certificate", command=lambda: Funcs.upload_file(MedTB,ACCID))
     Upload_Button.place(x=360, y=350, width=300, height=50)
 
 
-openHome(1)
+openlogin()
