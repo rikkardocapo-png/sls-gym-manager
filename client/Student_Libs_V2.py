@@ -12,21 +12,14 @@ from datetime import datetime, timedelta
 
 #Connection variables
 
-"""host="localhost"
+host="localhost"
 user="sls-modifyer"
 database="IA User-data"
-port=8889"""
+port=8889
+password=None
 
-
-host="sql307.infinityfree.com"
-user="if0_37349723"
-password="REDACTED"
-database="if0_37349723_GymDatabase"
-port=int(3306)
 
 #Functional subroutines
-
-
 
 def isweekend(date_str):
 
@@ -275,7 +268,7 @@ def upload_file(entry,AccID):
 def connect(query,params):
 
     try:
-        connection = mysql.connect(host=host, user=user, database=database, port=port, password=password)
+        connection = mysql.connect(host=host, user=user, database=database, port=port, password= password)
         cursor = connection.cursor()
         cursor.execute(query,params)
 

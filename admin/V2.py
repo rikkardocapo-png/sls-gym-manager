@@ -19,7 +19,7 @@ def openMain():
     TopLabel.place(x=0 , y=0, width=900, height=75)
 
     Exit_Button = btnx.Button(B_window, bg="#efefef", font=('Times', 10), fg="#000000", justify="center",
-                            text="Exit",  command=lambda: Funcs.closewindow(B_window))
+                            text="Exit",  command=lambda: exit())
     Exit_Button.place(x=0, y=375, width=100, height=75)
 
     List_Button = btnx.Button(B_window, bg="#efefef", font=('Times', 10), fg="#000000", justify="center",

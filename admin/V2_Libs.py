@@ -10,16 +10,7 @@ import mysql.connector as mysql
 host="localhost"
 user="sls-modifyer"
 database="IA User-data"
-port=8889
-password=None
-
-"""host="sql307.infinityfree.com"
-user="if0_37349723"
-password="REDACTED"
-database="if0_37349723_GymDatabase"
-port=int(3306)"""
-
-
+Port=8889
 
 #Functional subroutines
 
@@ -246,7 +237,7 @@ def AllStudents():
 
 def connect(all,query):
     try:
-        connection = mysql.connect(host=host, user=user, database=database, port=int(port), password=password)
+        connection = mysql.connect(host=host, user=user, database=database, port=Port)
         cursor = connection.cursor()
         cursor.execute(query)
 
@@ -278,7 +269,6 @@ def deletefile(AccID,D_Label,S_Label):
 
 def closewindow(window):
     window.destroy()
-    # needed for exit on windows wich aren't already defined
 
 #Secondary page subroutines
 
