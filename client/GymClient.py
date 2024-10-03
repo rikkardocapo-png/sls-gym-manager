@@ -467,4 +467,5 @@ def openMed(ACCID):
 
 
 
-openHome(1)
+if __name__ == "__main__":
+    openlogin()
