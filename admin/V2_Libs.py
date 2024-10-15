@@ -10,7 +10,7 @@ import mysql.connector as mysql
 host="localhost"
 user="sls-modifyer"
 database="IA User-data"
-Port=8889
+port=8889
 
 #Functional subroutines
 
@@ -237,7 +237,7 @@ def AllStudents():
 
 def connect(all,query):
     try:
-        connection = mysql.connect(host=host, user=user, database=database, port=Port)
+        connection = mysql.connect(host=host, user=user, database=database, port=port)
         cursor = connection.cursor()
         cursor.execute(query)
 

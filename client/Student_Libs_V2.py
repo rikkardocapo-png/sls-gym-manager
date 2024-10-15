@@ -16,8 +16,6 @@ host="localhost"
 user="sls-modifyer"
 database="IA User-data"
 port=8889
-password=None
-
 
 #Functional subroutines
 
@@ -268,7 +266,7 @@ def upload_file(entry,AccID):
 def connect(query,params):
 
     try:
-        connection = mysql.connect(host=host, user=user, database=database, port=port, password= password)
+        connection = mysql.connect(host=host, user=user, database=database, port=port)
         cursor = connection.cursor()
         cursor.execute(query,params)
 
