@@ -1,3 +1,4 @@
+import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from datetime import datetime, timedelta
@@ -46,18 +47,18 @@ def getTTstatus(i,o):
     result = connect(False,f"SELECT COUNT(*) AS count_entries FROM Timetable WHERE Period = '{o}' AND Date = '{getday(i)}'")[0]
 
     if result == 20:
-        colour = "red"
+        style = "Red.TButton"
     elif result >= 10 and result < 20:
-        colour = "yellow"
+        style = "Yellow.TButton"
     elif result >=0 and result < 10 :
-        colour = "green"
+        style = "Green.TButton"
     else:
         print("warning - exceeded max capacity")
         return
 
     result = f"{result}/20"
 
-    return result,colour
+    return result,style
 
 def MedStatus(AccID):
     result=connect(False,f"SELECT Expiry FROM Certificates WHERE MedID = '{AccID}'")
@@ -130,9 +131,9 @@ def GetMedDate(AccID):
     else:
         return "--/--/----"
 
-def AllStudentList():
+def AllStudentList(window):
 
-    S_window = Tk()
+    S_window = tk.Toplevel(window)
     SpawnX = int((S_window.winfo_screenwidth() / 2) - (400 / 2))
     SpawnY = int((S_window.winfo_screenheight() / 2) - (400 / 2))
     S_window.title("Student Attendance")
@@ -158,10 +159,14 @@ def AllStudentList():
         counter = counter + 1
 
 
-    tree.bind("<Button-1>", lambda event: on_click(event, tree,students,None,None))
+    tree.bind("<Button-1>", lambda event: on_click(event, tree,students,None,None,window))
 
 
     S_window.mainloop()
+
+def refresh(root,procedure):
+    root()
+    procedure()
 
 def saveMed(pdf_data, filename):
     if pdf_data != None:
@@ -180,7 +185,7 @@ def getMedData(AccID):
     print(len(Data))
     return Data
 
-def on_click(event,tree,students,o,i):
+def on_click(event,tree,students,o,i,window):
     region = tree.identify_region(event.x, event.y)
     item = tree.identify_row(event.y)
     column = tree.identify_column(event.x)
@@ -200,7 +205,7 @@ def on_click(event,tree,students,o,i):
             counter = counter + 1
 
         if column == "#1":
-            open_S_info(studentID)
+            open_S_info(studentID,window)
         elif column == "#2":
             if connect(False,f"SELECT Present FROM Timetable WHERE Period = '{o}' AND Date = '{getday(i)}' AND AccID ='{studentID}'")[0] == 1:
                 connect(False,f"UPDATE Timetable SET Present = 0 WHERE Period = '{o}' AND Date = '{getday(i)}' AND AccID ='{studentID}'")
@@ -272,10 +277,10 @@ def closewindow(window):
 
 #Secondary page subroutines
 
-def TTBTN_press(i, o):
+def TTBTN_press(i, o, window):
 
 
-    S_window = Tk()
+    S_window = tk.Toplevel(window)
     SpawnX = int((S_window.winfo_screenwidth() / 2) - (400 / 2))
     SpawnY = int((S_window.winfo_screenheight() / 2) - (400 / 2))
     S_window.title("Student Attendance")
@@ -302,13 +307,13 @@ def TTBTN_press(i, o):
         counter = counter + 1
 
 
-    tree.bind("<Button-1>", lambda event: on_click(event, tree,students,o,i))
+    tree.bind("<Button-1>", lambda event: on_click(event, tree,students,o,i,window))
 
 
     S_window.mainloop()
 
-def open_S_info(AccID):
-    SI_window = Tk()
+def open_S_info(AccID, window):
+    SI_window = tk.Toplevel(window)
     SpawnX = int((SI_window.winfo_screenwidth() / 2) - (600 / 2))
     SpawnY = int((SI_window.winfo_screenheight() / 2) - (430 / 2))
     SI_window.geometry(f"600x430+{SpawnX}+{SpawnY}")
@@ -319,11 +324,8 @@ def open_S_info(AccID):
                        text=f"{IDtoName(AccID)[0]} {IDtoName(AccID)[1]}'s Information")
     TitleLabel.place(x=0, y=0, width=600, height=70)
 
-    QuitButton = Button(SI_window, bg="#efefef", font=('Times', 10), fg="#000000", justify="center", text="Exit",
-                        command=lambda:closewindow(SI_window) )
-    QuitButton.place(x=30, y=370, width=70, height=25)
-
-
+    QuitButton = ttk.Button(SI_window, style="Menu.TButton", text="Exit",command=lambda:closewindow(SI_window))
+    QuitButton.place(x=30, y=370, width=70, height=50)
 
     IND_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
                       text=f"Induction day status:")
@@ -333,53 +335,47 @@ def open_S_info(AccID):
                              text=IndStatus(AccID)[0], bg=IndStatus(AccID)[1])
     IND_Status_Label.place(x=30, y=125, width=250, height=35)
 
-    IND_Status_BTN = Button(SI_window, font=('Times', 20), fg="#333333", justify="center",text="Change",
-                            command=lambda:ChangeIndStatus(AccID,IND_Status_Label))
+    IND_Status_BTN = ttk.Button(SI_window, style="Menu.TButton",text="Change",command=lambda:ChangeIndStatus(AccID,IND_Status_Label))
     IND_Status_BTN.place(x=30, y=160, width=250, height=35)
 
     T_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
-                      text=f"Account status:")
+                             text=f"Account status:")
     T_Label.place(x=30, y=225, width=250, height=50)
 
     T_Status_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
                              text=TeachStatus(AccID)[0], bg=TeachStatus(AccID)[1])
     T_Status_Label.place(x=30, y=275, width=250, height=35)
 
-    T_Status_BTN = Button(SI_window, font=('Times', 20), fg="#333333", justify="center",text="Change",
-                          command=lambda:ChangeTeachStatus(AccID,T_Status_Label))
+    T_Status_BTN = ttk.Button(SI_window, style="Menu.TButton",text="Change",command=lambda:ChangeTeachStatus(AccID,T_Status_Label))
     T_Status_BTN.place(x=30, y=310, width=250, height=35)
 
     C_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
-                      text=f"Certificate status:")
+                             text=f"Certificate status:")
     C_Label.place(x=310, y=75, width=250, height=50)
 
     C_Status_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
                              text=MedStatus(AccID)[0], bg=MedStatus(AccID)[1])
     C_Status_Label.place(x=310, y=125, width=250, height=35)
 
-    C_Status_BTN = Button(SI_window, font=('Times', 20), fg="#333333", justify="center",text="Approve",
-                            command=lambda:ChangeMedStatus(AccID,C_Status_Label))
+    C_Status_BTN = ttk.Button(SI_window, text="Approve", style="Menu.TButton",command=lambda:ChangeMedStatus(AccID,C_Status_Label))
     C_Status_BTN.place(x=310, y=160, width=250, height=35)
 
     CD_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
-                      text=f"Expiry date:")
+                             text=f"Expiry date:")
     CD_Label.place(x=310, y=225, width=250, height=50)
 
     CD_Status_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
                              text=GetMedDate(AccID), bg="#efefef")
     CD_Status_Label.place(x=310, y=275, width=250, height=35)
 
-    CD_Status_BTN = Button(SI_window, font=('Times', 20), fg="#333333", justify="center",text="Download",
-                            command=lambda:saveMed(getMedData(AccID),f"{IDtoName(AccID)[0]} {IDtoName(AccID)[1]}'s certificate.pdf"))
+    CD_Status_BTN = ttk.Button(SI_window, style="Menu.TButton",text="Download",command=lambda:saveMed(getMedData(AccID),f"{IDtoName(AccID)[0]} {IDtoName(AccID)[1]}'s certificate.pdf"))
     CD_Status_BTN.place(x=310, y=310, width=125, height=35)
 
-    CD_Delete_BTN = Button(SI_window, font=('Times', 20), fg="#333333", justify="center", text="Delete proposal",
-                           command=lambda: deletefile(AccID,CD_Status_Label,C_Status_Label))
+    CD_Delete_BTN = ttk.Button(SI_window, style="Menu.TButton", text="Delete draft",command=lambda: deletefile(AccID,CD_Status_Label,C_Status_Label))
     CD_Delete_BTN.place(x=435, y=310, width=125, height=35)
 
 
     SI_window.mainloop()
-
 
 
 

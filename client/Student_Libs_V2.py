@@ -10,12 +10,20 @@ import os
 from tkinter import filedialog
 from datetime import datetime, timedelta
 
-#Connection variables
+from Serverapp.test import password
 
+#Connection variables
+"""
 host="localhost"
 user="sls-modifyer"
 database="IA User-data"
-port=8889
+port=8889"""
+
+host="sql.slsprojects.it"
+user="slsproje37171"
+database="slsproje37171"
+port=3306
+psw="REDACTED"
 
 #Functional subroutines
 
@@ -107,19 +115,19 @@ def getTTstatus(i,o,AccID):
 
     if present == None:
         if result == 20:
-            colour = "red"
+            style = "Red.TButton"
         elif result >= 10 and result < 20:
-            colour = "yellow"
+            style = "Yellow.TButton"
         elif result >=0 and result < 10 :
-            colour = "green"
+            style = "Green.TButton"
         else:
             print("warning - exceeded max capacity")
     else:
-        colour = "#7B68EE"
+        style = "Purple.TButton"
 
     result = f"{result}/20"
 
-    return result,colour
+    return result,style
 
 def MedStatus(AccID):
     result=connect("SELECT Expiry FROM Certificates WHERE MedID = %s",(AccID,))
@@ -143,17 +151,22 @@ def MedStatus(AccID):
 def IndStatus(AccID):
 
     if connect("SELECT Induction FROM Users WHERE AccID = %s",(AccID,))[0] == 0:
-        return "Not completed","red"
+        return "Not completed","red",False
     else:
-        return "Completed","green"
+        return "Completed","green",True
 
 def TTBTN_press(i, o, AccID, button):
     if not checkteacher(AccID) and o >= 3:
-        message.showinfo("Teachercheck - Failed", "Error - non teacher accounts cannot access such periods")
+        print(checkteacher(AccID))
+        message.showinfo("Teachercheck - Failed", "Error - Non teacher account")
         return
 
     if not MedStatus(AccID)[2]:
-        message.showinfo("Medcheck - Failed", "Error - certificate invalid")
+        message.showinfo("Medcheck - Failed", "Error - Certificate invalid")
+        return
+
+    if not IndStatus(AccID)[2]:
+        message.showinfo("Indcheck - Failed", "Error - Induction not complete")
         return
 
     if connect("SELECT COUNT(*) AS count_entries FROM Timetable WHERE Period = %s AND Date = %s", (o, getday(i)))[0] == 20:
@@ -165,8 +178,8 @@ def TTBTN_press(i, o, AccID, button):
     else:
         connect("DELETE FROM Timetable WHERE AccID = %s AND Period = %s AND Date = %s",(AccID, o, getday(i)))
 
-    new_text, new_bg = getTTstatus(i, o, AccID)
-    button.configure(text=new_text, bg=new_bg,anchor="center", justify="center")
+    new_text,new_style = getTTstatus(i, o, AccID)
+    button.configure(style=new_style, text=new_text)
 
 def checkteacher(AccID):
     query = "SELECT Teacher FROM Users WHERE AccID = %s"
@@ -211,7 +224,7 @@ def select_file(button):
     if file_path and file_path.endswith('.pdf'):
         filepath = file_path
         file_name = os.path.basename(file_path)
-        button.configure(text=file_name, anchor="center", justify="center")
+        button.configure(text=file_name)
     else:
         message.showinfo("Error","Be sure to select a valid PDF file")
 
@@ -266,7 +279,7 @@ def upload_file(entry,AccID):
 def connect(query,params):
 
     try:
-        connection = mysql.connect(host=host, user=user, database=database, port=port)
+        connection = mysql.connect(host=host, user=user, database=database, password=psw)
         cursor = connection.cursor()
         cursor.execute(query,params)
 
@@ -286,5 +299,9 @@ def connect(query,params):
         if connection:
             connection.close()
 
+def refresh(root,procedure):
+
+    root.destroy()
+    procedure()
 
 
