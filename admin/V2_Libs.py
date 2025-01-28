@@ -1,3 +1,8 @@
+
+
+
+#Library dependency imports
+
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
@@ -6,23 +11,21 @@ import os
 import tkinter.messagebox as message
 import mysql.connector as mysql
 
+
+
 #Connection variables
 
-host="localhost"
-user="sls-modifyer"
-database="IA User-data"
-port=8889
+host="sql7.freesqldatabase.com"
+user="sql7757512"
+database="sql7757512"
+port=3306
+psw="REDACTED"
+cursor=None
+connection=None
 
-#Functional subroutines
 
-def isweekend(date_str):
 
-    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
-    day_of_week = date_obj.weekday()
-    if day_of_week < 5:
-        return True
-    else:
-        return False
+#Data retrieval subroutines
 
 def IDtoName(ACCID):
 
@@ -34,102 +37,6 @@ def getday(adder):
     today = datetime.today()
     future_date = today + timedelta(days=adder)
     return future_date.date()
-
-def presentStatus(i,o,AccID):
-    result = connect(False,f"SELECT Present FROM Timetable WHERE Period = '{o}' AND Date = '{getday(i)}' AND AccID ='{AccID}'")[0]
-    if result == 1:
-        return True,"Present"
-    else:
-        return False,"Not present"
-
-def getTTstatus(i,o):
-
-    result = connect(False,f"SELECT COUNT(*) AS count_entries FROM Timetable WHERE Period = '{o}' AND Date = '{getday(i)}'")[0]
-
-    if result == 20:
-        style = "Red.TButton"
-    elif result >= 10 and result < 20:
-        style = "Yellow.TButton"
-    elif result >=0 and result < 10 :
-        style = "Green.TButton"
-    else:
-        print("warning - exceeded max capacity")
-        return
-
-    result = f"{result}/20"
-
-    return result,style
-
-def MedStatus(AccID):
-    result=connect(False,f"SELECT Expiry FROM Certificates WHERE MedID = '{AccID}'")
-
-    if result == None:
-        return "Not submitted","red",True
-    elif connect(False,f"SELECT Approved FROM Certificates WHERE MedID = '{AccID}'")[0] == 0:
-        return "Not yet approved", "lightblue", False
-
-    else:
-        result=result[0]
-        if getday(0) <= result <= getday(14):
-            return f"Expires in {(result-getday(0)).days} days", "yellow",True
-
-        elif result < getday(0):
-            return "Expired", "red",False
-
-        else:
-            return "Submitted", "green",True
-
-def ChangeMedStatus(AccID,LBL):
-    if MedStatus(AccID)[2] == False:
-        connect(False,f"UPDATE Certificates SET Approved = 1 WHERE MedID = '{AccID}' ")
-        LBL.configure(text=MedStatus(AccID)[0],bg=MedStatus(AccID)[1])
-
-    else:
-        connect(False, f"UPDATE Certificates SET Approved = 0 WHERE MedID = '{AccID}' ")
-        LBL.configure(text=MedStatus(AccID)[0],bg=MedStatus(AccID)[1])
-
-def IndStatus(AccID):
-
-    if connect(False,f"SELECT Induction FROM Users WHERE AccID = '{AccID}'")[0] == 0:
-        return "Not completed","red", False
-    else:
-        return "Completed","green",True
-
-def ChangeIndStatus(AccID,LBL):
-
-    if IndStatus(AccID)[2] == False:
-        connect(False,f"UPDATE Users SET Induction = 1 WHERE AccID = '{AccID}' ")
-        LBL.configure(text=IndStatus(AccID)[0],bg=IndStatus(AccID)[1])
-
-    else:
-        connect(False, f"UPDATE Users SET Induction = 0 WHERE AccID = '{AccID}' ")
-        LBL.configure(text=IndStatus(AccID)[0],bg=IndStatus(AccID)[1])
-
-def TeachStatus(AccID):
-
-    if connect(False,f"SELECT Teacher FROM Users WHERE AccID = '{AccID}'")[0] == 0:
-        return "Student","lightblue",False
-    else:
-        return "Teacher","#8652B7",True
-
-def ChangeTeachStatus(AccID,LBL):
-
-    if TeachStatus(AccID)[2] == False:
-        connect(False,f"UPDATE Users SET Teacher = 1 WHERE AccID = '{AccID}' ")
-        LBL.configure(text=TeachStatus(AccID)[0],bg=TeachStatus(AccID)[1])
-
-    else:
-        connect(False, f"UPDATE Users SET Teacher = 0 WHERE AccID = '{AccID}' ")
-        LBL.configure(text=TeachStatus(AccID)[0],bg=TeachStatus(AccID)[1])
-
-def GetMedDate(AccID):
-    if connect(False,f"SELECT * FROM Certificates WHERE MedID = {AccID}") != None:
-        date = connect(False,f"SELECT Expiry FROM Certificates WHERE MedID = {AccID}")[0]
-        formattedDate = date.strftime('%d/%m/%Y')
-        return formattedDate
-
-    else:
-        return "--/--/----"
 
 def AllStudentList(window):
 
@@ -164,26 +71,103 @@ def AllStudentList(window):
 
     S_window.mainloop()
 
-def refresh(root,procedure):
-    root()
-    procedure()
+def AllStudents():
 
-def saveMed(pdf_data, filename):
-    if pdf_data != None:
+    AccId_List_Tuple = connect(True,f"SELECT AccID From Users")
+    AccId_List = [item[0] for item in AccId_List_Tuple]
+    AccName_List = []
 
-        downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
-        pdf_file_path = os.path.join(downloads_folder, filename)
+    for ID in AccId_List:
+        data = connect(False,f"SELECT Name, Surname FROM Users WHERE AccID = {ID}")
+        Insertable = f"{data[0]} {data[1]}"
+        AccName_List.append(Insertable)
 
-        with open(pdf_file_path, "wb") as pdf_file:
-            pdf_file.write(pdf_data)
-        message.showinfo("Download","Download completed succesfully")
-    else:
-        message.showinfo("Download", "No file found on database")
+    return AccId_List,AccName_List
 
 def getMedData(AccID):
     Data = connect(False,f"SELECT Image FROM Certificates WHERE MedID = '{AccID}'")[0]
-    print(len(Data))
+
     return Data
+
+
+
+#Status retrieval subroutines
+
+def isweekend(date_str):
+
+    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+    day_of_week = date_obj.weekday()
+    if day_of_week < 5:
+        return True
+    else:
+        return False
+
+def presentStatus(i,o,AccID):
+    result = connect(False,f"SELECT Present FROM Timetable WHERE Period = '{o}' AND Date = '{getday(i)}' AND AccID ='{AccID}'")[0]
+    if result == 1:
+        return True,"Present"
+    else:
+        return False,"Not present"
+
+def getTTstatus(i,o):
+
+    result = connect(False,f"SELECT COUNT(*) AS count_entries FROM Timetable WHERE Period = '{o}' AND Date = '{getday(i)}'")[0]
+
+    if result == 20:
+        style = "Red.TButton"
+    elif result >= 10 and result < 20:
+        style = "Yellow.TButton"
+    elif result >=0 and result < 10 :
+        style = "Green.TButton"
+    else:
+
+        return
+
+    result = f"{result}/20"
+
+    return result,style
+
+def MedStatus(AccID):
+    result=connect(False,f"SELECT Expiry FROM Certificates WHERE MedID = '{AccID}'")
+
+    if result == None:
+        return "Not submitted","red",True
+    elif connect(False,f"SELECT Approved FROM Certificates WHERE MedID = '{AccID}'")[0] == 0:
+        return "Not yet approved", "lightblue", False
+
+    else:
+        result=result[0]
+        if getday(0) <= result <= getday(14):
+            return f"Expires in {(result-getday(0)).days} days", "yellow",True
+
+        elif result < getday(0):
+            return "Expired", "red",False
+
+        else:
+            return "Submitted", "green",True
+
+def IndStatus(AccID):
+
+    if connect(False,f"SELECT Induction FROM Users WHERE AccID = '{AccID}'")[0] == 0:
+        return "Not completed","red", False
+    else:
+        return "Completed","green",True
+
+def TeachStatus(AccID):
+
+    if connect(False,f"SELECT Teacher FROM Users WHERE AccID = '{AccID}'")[0] == 0:
+        return "Student","lightblue",False
+    else:
+        return "Teacher","#8652B7",True
+
+def GetMedDate(AccID):
+    if connect(False,f"SELECT * FROM Certificates WHERE MedID = {AccID}") != None:
+        date = connect(False,f"SELECT Expiry FROM Certificates WHERE MedID = {AccID}")[0]
+        formattedDate = date.strftime('%d/%m/%Y')
+        return formattedDate
+
+    else:
+        return "--/--/----"
 
 def on_click(event,tree,students,o,i,window):
     region = tree.identify_region(event.x, event.y)
@@ -227,55 +211,62 @@ def S_in_period(i,o):
 
     return AccId_List,AccName_List
 
-def AllStudents():
 
-    AccId_List_Tuple = connect(True,f"SELECT AccID From Users")
-    AccId_List = [item[0] for item in AccId_List_Tuple]
-    AccName_List = []
 
-    for ID in AccId_List:
-        data = connect(False,f"SELECT Name, Surname FROM Users WHERE AccID = {ID}")
-        Insertable = f"{data[0]} {data[1]}"
-        AccName_List.append(Insertable)
+#Data modification subroutines
+def ChangeMedStatus(AccID,LBL):
+    if MedStatus(AccID)[2] == False:
+        connect(False,f"UPDATE Certificates SET Approved = 1 WHERE MedID = '{AccID}' ")
+        LBL.configure(text=MedStatus(AccID)[0],bg=MedStatus(AccID)[1])
 
-    return AccId_List,AccName_List
+    else:
+        connect(False, f"UPDATE Certificates SET Approved = 0 WHERE MedID = '{AccID}' ")
+        LBL.configure(text=MedStatus(AccID)[0],bg=MedStatus(AccID)[1])
 
-def connect(all,query):
-    try:
-        connection = mysql.connect(host=host, user=user, database=database, port=port)
-        cursor = connection.cursor()
-        cursor.execute(query)
+def ChangeIndStatus(AccID,LBL):
 
-        if query.strip().upper().startswith(("INSERT", "DELETE", "UPDATE")):
-            connection.commit()
-        if query.strip().upper().startswith("SELECT"):
-            if all == True:
-                result = cursor.fetchall()
-                return result
-            else:
-                result = cursor.fetchone()
-                return result
+    if IndStatus(AccID)[2] == False:
+        connect(False,f"UPDATE Users SET Induction = 1 WHERE AccID = '{AccID}' ")
+        LBL.configure(text=IndStatus(AccID)[0],bg=IndStatus(AccID)[1])
 
-    except Exception as e:
-        message.showinfo("Connect failure", f"Error:{e}")
-        return None
+    else:
+        connect(False, f"UPDATE Users SET Induction = 0 WHERE AccID = '{AccID}' ")
+        LBL.configure(text=IndStatus(AccID)[0],bg=IndStatus(AccID)[1])
 
-    finally:
-        if cursor:
-            cursor.fetchall()
-            cursor.close()
-        if connection:
-            connection.close()
+def ChangeTeachStatus(AccID,LBL):
+
+    if TeachStatus(AccID)[2] == False:
+        connect(False,f"UPDATE Users SET Teacher = 1 WHERE AccID = '{AccID}' ")
+        LBL.configure(text=TeachStatus(AccID)[0],bg=TeachStatus(AccID)[1])
+
+    else:
+        connect(False, f"UPDATE Users SET Teacher = 0 WHERE AccID = '{AccID}' ")
+        LBL.configure(text=TeachStatus(AccID)[0],bg=TeachStatus(AccID)[1])
+
+def saveMed(pdf_data, filename):
+    if pdf_data != None:
+
+        downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
+        pdf_file_path = os.path.join(downloads_folder, filename)
+
+        with open(pdf_file_path, "wb") as pdf_file:
+            pdf_file.write(pdf_data)
+        message.showinfo("Download","Download completed succesfully")
+    else:
+        message.showinfo("Download", "No file found on database")
 
 def deletefile(AccID,D_Label,S_Label):
     connect(False,f"DELETE FROM Certificates WHERE MedID = {AccID}")
     D_Label.configure(text=GetMedDate(AccID))
     S_Label.configure(text=MedStatus(AccID)[0], bg=MedStatus(AccID)[1])
 
-def closewindow(window):
-    window.destroy()
 
-#Secondary page subroutines
+
+#Secondary page subroutines and dependencies
+
+def refresh(root,procedure):
+    root()
+    procedure()
 
 def TTBTN_press(i, o, window):
 
@@ -376,6 +367,63 @@ def open_S_info(AccID, window):
 
 
     SI_window.mainloop()
+
+def closewindow(window):
+    window.destroy()
+
+
+
+#Connection subroutines
+
+def connect(all,query):
+    global cursor
+    global connection
+
+    try:
+        if not connection.is_connected():
+            close_connection()
+            initialize_connection()
+    except Exception as e:
+        message.showinfo("Connection failure", f"Error:{e}")
+        return None
+
+    try:
+        cursor.execute(query)
+        if query.strip().upper().startswith(("INSERT", "DELETE", "UPDATE")):
+            connection.commit()
+        if query.strip().upper().startswith("SELECT"):
+            if all == True:
+                result = cursor.fetchall()
+                return result
+            else:
+                result = cursor.fetchone()
+                return result
+
+    except Exception as e:
+        message.showinfo("SQl failure", f"Error:{e}")
+        return None
+
+def initialize_connection():
+    global cursor
+    global connection
+    global host, user, database, port, psw
+    try:
+        connection = mysql.connect(host=host, user=user, database=database, password=psw, port=port)
+        cursor = connection.cursor()
+
+    except Exception as e:
+        message.showinfo("Connect failure", f"Error:{e}")
+        return None
+
+def close_connection():
+    global connection
+    global cursor
+    if connection:
+        connection.close()
+
+    if cursor:
+        cursor.close()
+
 
 
 

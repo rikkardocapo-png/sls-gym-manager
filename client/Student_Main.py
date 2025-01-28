@@ -1,15 +1,17 @@
 
-from tkinter import *
 
-import tkinter.messagebox as message
-from datetime import datetime, timedelta
-import Student_Libs_V2 as Funcs
+
+# Importing libraries
+
+from tkinter import *
+import Student_Libs as Funcs
 import tkinter as tk
 from tkinter import ttk
-import time
+import atexit
 
 
 # Startup variables
+
 SU_window = None
 LG_window = None
 H_window = None
@@ -26,7 +28,10 @@ H_Med_Status_Label = None
 teacheremail="gym-staff@example.com"
 supportemail="rcapobianco@stlouisschoolapps.com"
 
+
+
 # Window subroutines
+
 def setup_styles():
     global style
     style = ttk.Style()
@@ -39,7 +44,7 @@ def setup_styles():
     style.map('Menu2.TButton',
               background=[('active', '#8a8a8a'), ('pressed', 'deepskyblue')])
 
-    style.configure('Menu3.TButton', background='#eb5841', foreground='#333333', padding=5, font=('Times', 15))
+    style.configure('Menu3.TButton', background='#eb5841', foreground='#333333', padding=5, font=('Poppins', 15))
     style.map('Menu3.TButton',
               background=[('active', '#8a8a8a')])
 
@@ -68,10 +73,10 @@ def setup_styles():
               background=[('active', '#9c59b5'), ('pressed', 'deepskyblue')])
 
 def closewindows(windows):
-    time.sleep(0.075)
     for i in range(len(windows)):
         try:
             windows[i].withdraw()
+
         except:
             pass
 
@@ -96,25 +101,26 @@ def openlogin():
         SpawnY = int((LG_window.winfo_screenheight() / 2) - (430 / 2))
         LG_window.geometry(f"900x450+{SpawnX}+{SpawnY}")
         LG_window.title("Log-in")
+
         LG_window.resizable(width=False, height=False)
 
-        LG_TitleLabel = tk.Label(LG_window, background="#eb5841", font=('Times', 38), foreground="#333333", justify="center",
+        LG_TitleLabel = tk.Label(LG_window, background="#eb5841", font=('Poppins', 38), foreground="#333333", justify="center",
                                  text="SLS gym companion")
         LG_TitleLabel.place(x=225, y=60, width=450, height=70)
 
-        LG_Userlabel = tk.Label(LG_window, background="#FFFFFF", font=('Times', 23), foreground="#333333", justify="center",
+        LG_Userlabel = tk.Label(LG_window, background="#FFFFFF", font=('Poppins', 23), foreground="#333333", justify="center",
                                  text="E-mail:")
         LG_Userlabel.place(x=360, y=170, width=180, height=35)
 
-        LG_e_user = tk.Entry(LG_window, background="#FFFFFF", borderwidth="1px", font=('Times', 10), foreground="#333333",
+        LG_e_user = tk.Entry(LG_window, background="#FFFFFF", borderwidth="1px", font=('Poppins', 10), foreground="#333333",
                              justify="center")
         LG_e_user.place(x=360, y=205, width=180, height=35)
 
-        LG_Passlabel = tk.Label(LG_window, background="#FFFFFF", font=('Times', 23), foreground="#333333", justify="center",
+        LG_Passlabel = tk.Label(LG_window, background="#FFFFFF", font=('Poppins', 23), foreground="#333333", justify="center",
                                  text="Password:")
         LG_Passlabel.place(x=360, y=270, width=180, height=35)
 
-        LG_e_pass = tk.Entry(LG_window, background="#FFFFFF", borderwidth="1px", font=('Times', 10), foreground="#333333",
+        LG_e_pass = tk.Entry(LG_window, background="#FFFFFF", borderwidth="1px", font=('Poppins', 10), foreground="#333333",
                              justify="center", show="*")
         LG_e_pass.place(x=360, y=305, width=180, height=35)
 
@@ -148,13 +154,12 @@ def openLoading():
         L_window.title("Bookings")
         L_window.resizable(width=False, height=False)
 
-        B_TopLabel = Label(L_window, background="#eb5841", font=('Times', 38), foreground="#333333", justify="center",text="Loading...")
+        B_TopLabel = Label(L_window, background="#eb5841", font=('Poppins', 38), foreground="#333333", justify="center",text="Loading...")
         B_TopLabel.place(x=0, y=165, width=900, height=100)
         L_window.mainloop()
 
     else:
         L_window.deiconify()
-
 
 def opensignup():
     global SU_window, LG_window, H_window, B_window, C_window, I_window, L_window, style
@@ -169,39 +174,39 @@ def opensignup():
         SU_window.title("Sign-up")
         SU_window.resizable(width=False, height=False)
 
-        SU_TitleLabel = tk.Label(SU_window, background="#eb5841", font=('Times', 38), foreground="#333333", justify="center",
+        SU_TitleLabel = tk.Label(SU_window, background="#eb5841", font=('Poppins', 38), foreground="#333333", justify="center",
                                  text="Account Creation")
         SU_TitleLabel.place(x=225, y=60, width=450, height=70)
 
-        SU_Userlabel = tk.Label(SU_window, background="#FFFFFF", font=('Times', 23), foreground="#333333", justify="center",
+        SU_Userlabel = tk.Label(SU_window, background="#FFFFFF", font=('Poppins', 23), foreground="#333333", justify="center",
                                  text="E-mail:")
         SU_Userlabel.place(x=210, y=170, width=180, height=35)
 
-        SU_e_user = tk.Entry(SU_window, background="#FFFFFF", borderwidth="1px", font=('Times', 10), foreground="#333333",
+        SU_e_user = tk.Entry(SU_window, background="#FFFFFF", borderwidth="1px", font=('Poppins', 10), foreground="#333333",
                              justify="center")
         SU_e_user.place(x=210, y=205, width=180, height=35)
 
-        SU_Passlabel = tk.Label(SU_window, background="#FFFFFF", font=('Times', 23), foreground="#333333", justify="center",
+        SU_Passlabel = tk.Label(SU_window, background="#FFFFFF", font=('Poppins', 23), foreground="#333333", justify="center",
                                  text="Password:")
         SU_Passlabel.place(x=210, y=270, width=180, height=35)
 
-        SU_e_pass = tk.Entry(SU_window, background="#FFFFFF", borderwidth="1px", font=('Times', 10), foreground="#333333",
+        SU_e_pass = tk.Entry(SU_window, background="#FFFFFF", borderwidth="1px", font=('Poppins', 10), foreground="#333333",
                              justify="center")
         SU_e_pass.place(x=210, y=305, width=180, height=35)
 
-        SU_Namelabel = tk.Label(SU_window, background="#FFFFFF", font=('Times', 23), foreground="#333333", justify="center",
+        SU_Namelabel = tk.Label(SU_window, background="#FFFFFF", font=('Poppins', 23), foreground="#333333", justify="center",
                                 text="Name:")
         SU_Namelabel.place(x=510, y=170, width=180, height=35)
 
-        SU_e_name = tk.Entry(SU_window, background="#FFFFFF", borderwidth="1px", font=('Times', 10), foreground="#333333",
+        SU_e_name = tk.Entry(SU_window, background="#FFFFFF", borderwidth="1px", font=('Poppins', 10), foreground="#333333",
                              justify="center")
         SU_e_name.place(x=510, y=205, width=180, height=35)
 
-        SU_Surlabel = tk.Label(SU_window, background="#FFFFFF", font=('Times', 23), foreground="#333333", justify="center",
+        SU_Surlabel = tk.Label(SU_window, background="#FFFFFF", font=('Poppins', 23), foreground="#333333", justify="center",
                                text="Surname:")
         SU_Surlabel.place(x=510, y=270, width=180, height=35)
 
-        SU_e_sur = tk.Entry(SU_window, background="#FFFFFF", borderwidth="1px", font=('Times', 10), foreground="#333333",
+        SU_e_sur = tk.Entry(SU_window, background="#FFFFFF", borderwidth="1px", font=('Poppins', 10), foreground="#333333",
                             justify="center")
         SU_e_sur.place(x=510, y=305, width=180, height=35)
 
@@ -235,7 +240,7 @@ def openHome(ACCID):
         H_window.title("Home")
         H_window.resizable(width=False, height=False)
 
-        H_TopLabel = Label(H_window, background="#eb5841", font=('Times', 38), foreground="#333333", justify="center",
+        H_TopLabel = Label(H_window, background="#eb5841", font=('Poppins', 38), foreground="#333333", justify="center",
                            text="SLS gym - Home")
         H_TopLabel.place(x=150 , y=0, width=750, height=75)
 
@@ -259,31 +264,34 @@ def openHome(ACCID):
 
         """end of standard page -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -   -"""
 
-        H_UserLabel = Label(H_window, font=('Times', 30), foreground="#333333", justify="center",
+        H_UserLabel = Label(H_window, font=('Poppins', 30), foreground="#333333", justify="center",
                            text=f"Welcome back, {str(Funcs.IDtoName(ACCID)[0])}")
         H_UserLabel.place(x=300 , y=150, width=450, height=75)
 
-        H_Med_Label = Label(H_window, font=('Times', 30), foreground="#333333", justify="center",
+        H_Med_Label = Label(H_window, font=('Poppins', 30), foreground="#333333", justify="center",
                           text=f"Certificate status:")
         H_Med_Label.place(x=155, y=275, width=350, height=75)
 
-        H_Med_Status_Label = Label(H_window, font=('Times', 20), foreground="#333333", justify="center",
+        H_Med_Status_Label = Label(H_window, font=('Poppins', 20), foreground="#333333", justify="center",
                           text=Funcs.MedStatus(ACCID)[0], background=Funcs.MedStatus(ACCID)[1])
         H_Med_Status_Label.place(x=155, y=350, width=350, height=75)
 
-        H_IND_Label = Label(H_window, font=('Times', 30), foreground="#333333", justify="center",
+        H_IND_Label = Label(H_window, font=('Poppins', 30), foreground="#333333", justify="center",
                           text=f"Induction day status:")
         H_IND_Label.place(x=525, y=275, width=350, height=75)
 
-        H_IND_Status_Label = Label(H_window, font=('Times', 20), foreground="#333333", justify="center",
+        H_IND_Status_Label = Label(H_window, font=('Poppins', 20), foreground="#333333", justify="center",
                           text=Funcs.IndStatus(ACCID)[0], background=Funcs.IndStatus(ACCID)[1])
         H_IND_Status_Label.place(x=525, y=350, width=350, height=75)
+
+        H_window.after(60, closewindows, windows)
 
         H_window.mainloop()
 
     else:
         H_window.deiconify()
-
+        print(Funcs.MedStatus(ACCID))
+        print(Funcs.IndStatus(ACCID))
         H_Med_Status_Label.configure(text=Funcs.MedStatus(ACCID)[0], background=Funcs.MedStatus(ACCID)[1])
         H_IND_Status_Label.configure(text=Funcs.IndStatus(ACCID)[0], background=Funcs.IndStatus(ACCID)[1])
 
@@ -301,7 +309,7 @@ def openBook(ACCID):
         B_window.title("Bookings")
         B_window.resizable(width=False, height=False)
 
-        B_TopLabel = Label(B_window, background="#eb5841", font=('Times', 38), foreground="#333333", justify="center",text="SLS gym - Bookings")
+        B_TopLabel = Label(B_window, background="#eb5841", font=('Poppins', 38), foreground="#333333", justify="center",text="SLS gym - Bookings")
         B_TopLabel.place(x=150, y=0, width=750, height=75)
 
         B_Home_Button = ttk.Button(B_window, style="ToolB.TButton", text="Home", command=lambda: openHome(ACCID))
@@ -325,17 +333,17 @@ def openBook(ACCID):
         Rbutton = ttk.Button(B_window, text="Refresh", style="Menu3.TButton",command=lambda: refresh(B_window, ACCID))
         Rbutton.place(x=(225), y=(100), width=75, height=50)
 
-        Times=[" 14:00-15:00", "15:00- 16:00", "16:00-16:30", "16:45-17:15","17:15-18:00"]
+        Poppins=[" 14:00-15:00", "15:00- 16:00", "16:00-16:30", "16:45-17:15","17:15-18:00"]
 
         for i in range(7):
-            B_TTLabel1 = Label(B_window, background="#eb5841", font=('Times', 10), foreground="#333333", justify="center",
+            B_TTLabel1 = Label(B_window, background="#eb5841", font=('Poppins', 10), foreground="#333333", justify="center",
                            text=Funcs.getday(i))
             B_TTLabel1.place(x=(i*75+300),y=(100),width=75,height=50)
             if Funcs.isweekend(str(Funcs.getday(i))) == True:
                 for o in range(5):
                     if i == 0:
-                        B_TTLabel2 = Label(B_window, background="#eb5841", font=('Times', 10), foreground="#333333", justify="center",
-                                         text=Times[o])
+                        B_TTLabel2 = Label(B_window, background="#eb5841", font=('Poppins', 10), foreground="#333333", justify="center",
+                                         text=Poppins[o])
                         B_TTLabel2.place(x=(225), y=(o*50+150), width=75, height=50)
 
                     B_TTbutton = ttk.Button(B_window, text=Funcs.getTTstatus(i,o,ACCID)[0], style=Funcs.getTTstatus(i,o,ACCID)[1])
@@ -345,8 +353,8 @@ def openBook(ACCID):
             else:
                 for o in range(5):
                     if i == 0:
-                        B_TTLabel2 = Label(B_window, background="#eb5841", font=('Times', 10), foreground="#333333", justify="center",
-                                         text=Times[o])
+                        B_TTLabel2 = Label(B_window, background="#eb5841", font=('Poppins', 10), foreground="#333333", justify="center",
+                                         text=Poppins[o])
                         B_TTLabel2.place(x=(225), y=(o * 50 + 150), width=75, height=50)
 
                     B_WElabel = Label(B_window,background="grey")
@@ -374,7 +382,7 @@ def openContact(ACCID):
         C_window.title("Contact")
         C_window.resizable(width=False, height=False)
 
-        C_TopLabel = Label(C_window, background="#eb5841", font=('Times', 38), foreground="#333333", justify="center",
+        C_TopLabel = Label(C_window, background="#eb5841", font=('Poppins', 38), foreground="#333333", justify="center",
                            text="SLS gym - Contact ")
         C_TopLabel.place(x=150, y=0, width=750, height=75)
 
@@ -397,10 +405,10 @@ def openContact(ACCID):
         C_Exit_Button = ttk.Button(C_window, style="ToolB.TButton",  text="Exit", command=lambda: QuitApp())
         C_Exit_Button.place(x=0, y=375, width=150, height=75)
 
-        C_TeacherLabel = Label(C_window, background="#FFFFFF", font=('Times', 30), foreground="#333333", justify="center",text="Gym teacher reference: ")
+        C_TeacherLabel = Label(C_window, background="#FFFFFF", font=('Poppins', 30), foreground="#333333", justify="center",text="Gym teacher reference: ")
         C_TeacherLabel.place(x=200, y=175, width=300, height=50)
 
-        C_SupportLabel = Label(C_window, background="#FFFFFF", font=('Times', 30), foreground="#333333", justify="center",text="Tech support reference: ")
+        C_SupportLabel = Label(C_window, background="#FFFFFF", font=('Poppins', 30), foreground="#333333", justify="center",text="Tech support reference: ")
         C_SupportLabel.place(x=200, y=275, width=300, height=50)
 
         C_Teacher_Button = ttk.Button(C_window, style="Menu2.TButton",  text="Send message", command=lambda: Funcs.sendemail(teacheremail, ACCID, None))
@@ -430,7 +438,7 @@ def openInduction(ACCID):
         I_window.title("Induction")
         I_window.resizable(width=False, height=False)
 
-        I_TopLabel = Label(I_window, background="#eb5841", foreground="#333333", text="SLS gym - Induction ", font=('Times', 38))
+        I_TopLabel = Label(I_window, background="#eb5841", foreground="#333333", text="SLS gym - Induction ", font=('Poppins', 38))
         I_TopLabel.place(x=150, y=0, width=750, height=75)
 
         I_Home_Button = ttk.Button(I_window, style="ToolB.TButton", text="Home", command=lambda: openHome(ACCID))
@@ -451,7 +459,7 @@ def openInduction(ACCID):
         I_Exit_Button = ttk.Button(I_window, style="ToolB.TButton", text="Exit", command=lambda: QuitApp())
         I_Exit_Button.place(x=0, y=375, width=150, height=75)
 
-        I_ScriptLabel = Label(I_window, background="#FFFFFF", foreground="#333333", text="Induction days are appointed by the gym manager, contact below:", font=('Times', 30), wraplength=600)
+        I_ScriptLabel = Label(I_window, background="#FFFFFF", foreground="#333333", text="Induction days are appointed by the gym manager, contact below:", font=('Poppins', 30), wraplength=600)
         I_ScriptLabel.place(x=215, y=150, width=600, height=100)
 
         I_Teacher_Button = ttk.Button(I_window, style="Menu2.TButton", text="Send message", command=lambda: Funcs.sendemail(teacheremail, ACCID, True))
@@ -479,7 +487,7 @@ def openMed(ACCID):
         M_window.title("Certificate")
         M_window.resizable(width=False, height=False)
 
-        M_TopLabel = Label(M_window, background="#eb5841", foreground="#333333", text="SLS gym - Certificate ", font=('Times', 38))
+        M_TopLabel = Label(M_window, background="#eb5841", foreground="#333333", text="SLS gym - Certificate ", font=('Poppins', 38))
         M_TopLabel.place(x=150, y=0, width=750, height=75)
 
         M_Home_Button = ttk.Button(M_window, style="ToolB.TButton", text="Home", command=lambda: openHome(ACCID))
@@ -500,16 +508,16 @@ def openMed(ACCID):
         M_Exit_Button = ttk.Button(M_window, style="ToolB.TButton", text="Exit", command=lambda: QuitApp())
         M_Exit_Button.place(x=0, y=375, width=150, height=75)
 
-        M_ScriptLabel = Label(M_window, background="#FFFFFF", foreground="#333333", text="Select new certificate below:", wraplength=600, font=('Times', 30))
+        M_ScriptLabel = Label(M_window, background="#FFFFFF", foreground="#333333", text="Select new certificate below:", wraplength=600, font=('Poppins', 30))
         M_ScriptLabel.place(x=215, y=100, width=600, height=50)
 
         M_Select_Button = ttk.Button(M_window, style="Menu2.TButton", text="Select file", command=lambda: Funcs.select_file(M_Select_Button))
         M_Select_Button.place(x=360, y=150, width=300, height=50)
 
-        M_MedTB = Entry(M_window, background="#FFFFFF", foreground="#333333",font=("Times",30),justify='center')
+        M_MedTB = Entry(M_window, background="#FFFFFF", foreground="#333333",font=("Poppins",30),justify='center')
         M_MedTB.place(x=360, y=275, width=300, height=50)
 
-        M_DateLabel = Label(M_window, background="#FFFFFF", foreground="#333333", text="Insert certificare expiry date:", wraplength=600, font=('Times', 30))
+        M_DateLabel = Label(M_window, background="#FFFFFF", foreground="#333333", text="Insert certificare expiry date:", wraplength=600, font=('Poppins', 30))
         M_DateLabel.place(x=215, y=225, width=600, height=50)
 
         M_Upload_Button = ttk.Button(M_window, style="Menu2.TButton", text="Upload Certificate", command=lambda: Funcs.upload_file(M_MedTB, ACCID))
@@ -525,4 +533,11 @@ def openMed(ACCID):
         closewindows(windows)
 
 
-openlogin()
+# Startup
+
+if __name__ == "__main__":
+
+    Funcs.initialize_connection()
+    atexit.register(Funcs.close_connection)
+    openlogin()
+

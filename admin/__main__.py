@@ -1,9 +1,21 @@
+
+
+
+#Library dependency imports
+
 from tkinter import ttk
 from tkinter import *
 import V2_Libs as Funcs
+import atexit
+
+
+
+#Required variables
 
 style=None
 B_window=None
+
+
 
 
 # Main window subroutine
@@ -102,6 +114,12 @@ def QuitApp():
     B_window.destroy()
 
 
-openMain()
+
+# Startup
+
+if __name__ == "__main__":
+    Funcs.initialize_connection()
+    atexit.register(Funcs.close_connection)
+    openMain()
 
 
