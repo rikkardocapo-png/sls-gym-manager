@@ -214,6 +214,7 @@ def S_in_period(i,o):
 
 
 #Data modification subroutines
+
 def ChangeMedStatus(AccID,LBL):
     if MedStatus(AccID)[2] == False:
         connect(False,f"UPDATE Certificates SET Approved = 1 WHERE MedID = '{AccID}' ")
@@ -244,16 +245,19 @@ def ChangeTeachStatus(AccID,LBL):
         LBL.configure(text=TeachStatus(AccID)[0],bg=TeachStatus(AccID)[1])
 
 def saveMed(pdf_data, filename):
-    if pdf_data != None:
+    if pdf_data:
 
-        downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
-        pdf_file_path = os.path.join(downloads_folder, filename)
+        documents_folder = os.path.join(os.path.expanduser("~"), "Documents")
+        gym_certificates_folder = os.path.join(documents_folder, "Gym Certificates")
+        os.makedirs(gym_certificates_folder, exist_ok=True)
 
+        pdf_file_path = os.path.join(gym_certificates_folder, filename)
         with open(pdf_file_path, "wb") as pdf_file:
             pdf_file.write(pdf_data)
-        message.showinfo("Download","Download completed succesfully")
+
+        message.showinfo("Download", f"Download completed successfully!\nSaved to: {pdf_file_path}")
     else:
-        message.showinfo("Download", "No file found on database")
+        message.showinfo("Download", "No file found in the database, contact support")
 
 def deletefile(AccID,D_Label,S_Label):
     connect(False,f"DELETE FROM Certificates WHERE MedID = {AccID}")
@@ -264,9 +268,19 @@ def deletefile(AccID,D_Label,S_Label):
 
 #Secondary page subroutines and dependencies
 
-def refresh(root,procedure):
-    root()
-    procedure()
+def refresh(TTbuttons):
+    for i in range(7):
+        for o in range(5):
+            btn = TTbuttons.get((i, o))
+
+            if btn:
+                if not isweekend(str(getday(i))):
+                    btn.configure(text="", style="Grey.TButton", state="disabled")
+                else:
+                    text, style = getTTstatus(i, o)
+                    print(text, style)
+                    btn.configure(text=text, style=style, state="normal")
+    print("Update==Good")
 
 def TTBTN_press(i, o, window):
 
@@ -306,56 +320,56 @@ def TTBTN_press(i, o, window):
 def open_S_info(AccID, window):
     SI_window = tk.Toplevel(window)
     SpawnX = int((SI_window.winfo_screenwidth() / 2) - (600 / 2))
-    SpawnY = int((SI_window.winfo_screenheight() / 2) - (430 / 2))
-    SI_window.geometry(f"600x430+{SpawnX}+{SpawnY}")
+    SpawnY = int((SI_window.winfo_screenheight() / 2) - (450 / 2))
+    SI_window.geometry(f"600x450+{SpawnX}+{SpawnY}")
     SI_window.title("Student Information")
     SI_window.resizable(width=False, height=False)
 
-    TitleLabel = Label(SI_window, bg="#eb5841", font=('Times', 38), fg="#333333", justify="center",
+    TitleLabel = Label(SI_window, bg="#7830ff", font=('Poppins', 38), fg="#333333", justify="center",
                        text=f"{IDtoName(AccID)[0]} {IDtoName(AccID)[1]}'s Information")
-    TitleLabel.place(x=0, y=0, width=600, height=70)
+    TitleLabel.place(x=0, y=0, width=600, height=75)
 
     QuitButton = ttk.Button(SI_window, style="Menu.TButton", text="Exit",command=lambda:closewindow(SI_window))
-    QuitButton.place(x=30, y=370, width=70, height=50)
+    QuitButton.place(x=30, y=380, width=70, height=50)
 
-    IND_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
+    IND_Label = Label(SI_window, font=('Poppins', 20), fg="#333333", justify="center",
                       text=f"Induction day status:")
     IND_Label.place(x=30, y=75, width=250, height=50)
 
-    IND_Status_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
+    IND_Status_Label = Label(SI_window, font=('Poppins', 20), fg="#333333", justify="center",
                              text=IndStatus(AccID)[0], bg=IndStatus(AccID)[1])
     IND_Status_Label.place(x=30, y=125, width=250, height=35)
 
     IND_Status_BTN = ttk.Button(SI_window, style="Menu.TButton",text="Change",command=lambda:ChangeIndStatus(AccID,IND_Status_Label))
     IND_Status_BTN.place(x=30, y=160, width=250, height=35)
 
-    T_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
+    T_Label = Label(SI_window, font=('Poppins', 20), fg="#333333", justify="center",
                              text=f"Account status:")
     T_Label.place(x=30, y=225, width=250, height=50)
 
-    T_Status_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
+    T_Status_Label = Label(SI_window, font=('Poppins', 20), fg="#333333", justify="center",
                              text=TeachStatus(AccID)[0], bg=TeachStatus(AccID)[1])
     T_Status_Label.place(x=30, y=275, width=250, height=35)
 
     T_Status_BTN = ttk.Button(SI_window, style="Menu.TButton",text="Change",command=lambda:ChangeTeachStatus(AccID,T_Status_Label))
     T_Status_BTN.place(x=30, y=310, width=250, height=35)
 
-    C_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
+    C_Label = Label(SI_window, font=('Poppins', 20), fg="#333333", justify="center",
                              text=f"Certificate status:")
     C_Label.place(x=310, y=75, width=250, height=50)
 
-    C_Status_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
+    C_Status_Label = Label(SI_window, font=('Poppins', 20), fg="#333333", justify="center",
                              text=MedStatus(AccID)[0], bg=MedStatus(AccID)[1])
     C_Status_Label.place(x=310, y=125, width=250, height=35)
 
     C_Status_BTN = ttk.Button(SI_window, text="Approve", style="Menu.TButton",command=lambda:ChangeMedStatus(AccID,C_Status_Label))
     C_Status_BTN.place(x=310, y=160, width=250, height=35)
 
-    CD_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
+    CD_Label = Label(SI_window, font=('Poppins', 20), fg="#333333", justify="center",
                              text=f"Expiry date:")
     CD_Label.place(x=310, y=225, width=250, height=50)
 
-    CD_Status_Label = Label(SI_window, font=('Times', 20), fg="#333333", justify="center",
+    CD_Status_Label = Label(SI_window, font=('Poppins', 20), fg="#333333", justify="center",
                              text=GetMedDate(AccID), bg="#efefef")
     CD_Status_Label.place(x=310, y=275, width=250, height=35)
 
@@ -412,7 +426,7 @@ def initialize_connection():
         cursor = connection.cursor()
 
     except Exception as e:
-        message.showinfo("Connect failure", f"Error:{e}")
+
         return None
 
 def close_connection():
