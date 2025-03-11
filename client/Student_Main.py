@@ -3,6 +3,7 @@
 
 # Importing libraries
 
+import time
 from tkinter import *
 import Student_Libs as Funcs
 import tkinter as tk
@@ -19,10 +20,9 @@ B_window = None
 C_window = None
 I_window = None
 M_window = None
-L_window = None
 filepath = None
 style = None
-TTBUTTONS = []
+TTbuttons = {}
 H_IND_Status_Label = None
 H_Med_Status_Label = None
 teacheremail="gym-staff@example.com"
@@ -40,7 +40,7 @@ def setup_styles():
     style.map('Menu.TButton',
               background=[('active', '#8a8a8a'), ('pressed', 'deepskyblue')])
 
-    style.configure('Menu2.TButton', background='#FFFFFF', foreground='#333333', padding=5, font=("times",30))
+    style.configure('Menu2.TButton', background='#FFFFFF', foreground='#333333', padding=5, font=("Poppins",30))
     style.map('Menu2.TButton',
               background=[('active', '#8a8a8a'), ('pressed', 'deepskyblue')])
 
@@ -72,6 +72,10 @@ def setup_styles():
     style.map('Purple.TButton',
               background=[('active', '#9c59b5'), ('pressed', 'deepskyblue')])
 
+    style.configure('Grey.TButton', background='grey', foreground='#000000', padding=5)
+    style.map('Purple.TButton',
+              background=[('active', '#9c59b5'), ('pressed', 'black')])
+
 def closewindows(windows):
     for i in range(len(windows)):
         try:
@@ -80,19 +84,29 @@ def closewindows(windows):
         except:
             pass
 
-def refresh(window,AccID):
-    global B_window
-    B_window.destroy()
-    B_window=None
-    openBook(AccID)
+
+def refresh_buttons(ACCID):
+    global TTbuttons
+    for i in range(7):
+        for o in range(5):
+            btn = TTbuttons.get((i, o))
+
+            if btn:
+                if not Funcs.isweekend(str(Funcs.getday(i))):
+                    btn.configure(text="", style="Grey.TButton", state="disabled")
+                else:
+                    text, style = Funcs.getTTstatus(i, o, ACCID)
+                    btn.configure(text=text, style=style, state="normal")
+
+
 
 def QuitApp():
     global LG_window
     LG_window.destroy()
 
 def openlogin():
-    global SU_window, LG_window, H_window, B_window, C_window, I_window, L_window, style
-    windows = [SU_window, H_window, B_window, C_window, I_window]
+    global SU_window, LG_window, H_window, B_window, C_window, I_window, style
+    windows = [SU_window, H_window, B_window, C_window, I_window, ]
 
     if LG_window is None:
         LG_window = tk.Tk()
@@ -143,27 +157,9 @@ def openlogin():
         LG_window.deiconify()
         closewindows(windows)
 
-def openLoading():
-    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window,L_window
-    windows = [SU_window, LG_window, H_window, B_window, C_window, I_window, M_window]
-    if L_window == None:
-        L_window = tk.Toplevel(LG_window)
-        SpawnX = int((L_window.winfo_screenwidth() / 2) - (900 / 2))
-        SpawnY = int((L_window.winfo_screenheight() / 2) - (430 / 2))
-        L_window.geometry(f"900x450+{SpawnX}+{SpawnY}")
-        L_window.title("Bookings")
-        L_window.resizable(width=False, height=False)
-
-        B_TopLabel = Label(L_window, background="#eb5841", font=('Poppins', 38), foreground="#333333", justify="center",text="Loading...")
-        B_TopLabel.place(x=0, y=165, width=900, height=100)
-        L_window.mainloop()
-
-    else:
-        L_window.deiconify()
-
 def opensignup():
-    global SU_window, LG_window, H_window, B_window, C_window, I_window, L_window, style
-    windows = [LG_window, H_window, B_window, C_window, I_window, M_window, L_window]
+    global SU_window, LG_window, H_window, B_window, C_window, I_window, style
+    windows = [LG_window, H_window, B_window, C_window, I_window, M_window, ]
 
     if SU_window is None:
         SU_window = tk.Toplevel(LG_window)
@@ -229,8 +225,8 @@ def opensignup():
         closewindows(windows)
 
 def openHome(ACCID):
-    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, L_window, H_IND_Status_Label,H_Med_Status_Label
-    windows = [SU_window, LG_window, B_window, C_window, I_window, M_window, L_window]
+    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, H_IND_Status_Label,H_Med_Status_Label
+    windows = [SU_window, LG_window, B_window, C_window, I_window, M_window, ]
 
     if H_window == None:
         H_window = tk.Toplevel(LG_window)
@@ -290,16 +286,14 @@ def openHome(ACCID):
 
     else:
         H_window.deiconify()
-        print(Funcs.MedStatus(ACCID))
-        print(Funcs.IndStatus(ACCID))
         H_Med_Status_Label.configure(text=Funcs.MedStatus(ACCID)[0], background=Funcs.MedStatus(ACCID)[1])
         H_IND_Status_Label.configure(text=Funcs.IndStatus(ACCID)[0], background=Funcs.IndStatus(ACCID)[1])
 
         closewindows(windows)
 
 def openBook(ACCID):
-    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, L_window
-    windows = [SU_window, LG_window, H_window, C_window, I_window, M_window, L_window]
+    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, TTbuttons
+    windows = [SU_window, LG_window, H_window, C_window, I_window, M_window, ]
 
     if B_window == None:
         B_window = tk.Toplevel(LG_window)
@@ -330,10 +324,10 @@ def openBook(ACCID):
         B_Exit_Button = ttk.Button(B_window, style="ToolB.TButton", text="Exit", command=lambda: QuitApp())
         B_Exit_Button.place(x=0, y=375, width=150, height=75)
 
-        Rbutton = ttk.Button(B_window, text="Refresh", style="Menu3.TButton",command=lambda: refresh(B_window, ACCID))
+        Rbutton = ttk.Button(B_window, text="Refresh", style="Menu3.TButton",command=lambda: refresh_buttons(ACCID))
         Rbutton.place(x=(225), y=(100), width=75, height=50)
 
-        Poppins=[" 14:00-15:00", "15:00- 16:00", "16:00-16:30", "16:45-17:15","17:15-18:00"]
+        Time=[" 14:00-15:00", "15:00- 16:00", "16:00-16:30", "16:45-17:15","17:15-18:00"]
 
         for i in range(7):
             B_TTLabel1 = Label(B_window, background="#eb5841", font=('Poppins', 10), foreground="#333333", justify="center",
@@ -343,22 +337,23 @@ def openBook(ACCID):
                 for o in range(5):
                     if i == 0:
                         B_TTLabel2 = Label(B_window, background="#eb5841", font=('Poppins', 10), foreground="#333333", justify="center",
-                                         text=Poppins[o])
+                                         text=Time[o])
                         B_TTLabel2.place(x=(225), y=(o*50+150), width=75, height=50)
 
                     B_TTbutton = ttk.Button(B_window, text=Funcs.getTTstatus(i,o,ACCID)[0], style=Funcs.getTTstatus(i,o,ACCID)[1])
-                    B_TTbutton.place(x=(i*75+300),y=(o*50+150),width=75,height=50)
                     B_TTbutton.configure(command=lambda i=i, o=o, btn=B_TTbutton: Funcs.TTBTN_press(i, o, ACCID,btn))
-
+                    B_TTbutton.place(x=(i * 75 + 300), y=(o * 50 + 150), width=75, height=50)
+                    TTbuttons[(i, o)] = B_TTbutton
             else:
                 for o in range(5):
                     if i == 0:
                         B_TTLabel2 = Label(B_window, background="#eb5841", font=('Poppins', 10), foreground="#333333", justify="center",
-                                         text=Poppins[o])
+                                         text=Time[o])
                         B_TTLabel2.place(x=(225), y=(o * 50 + 150), width=75, height=50)
 
-                    B_WElabel = Label(B_window,background="grey")
-                    B_WElabel.place(x=(i * 75 + 300), y=(o * 50 + 150), width=75, height=50)
+                    B_TTbutton = ttk.Button(B_window, text="",style="Grey.TButton",state="disabled")
+                    B_TTbutton.place(x=(i * 75 + 300), y=(o * 50 + 150), width=75, height=50)
+                    TTbuttons[(i, o)] = B_TTbutton
 
         B_window.after(60, closewindows, windows)
 
@@ -371,8 +366,8 @@ def openBook(ACCID):
         closewindows(windows)
 
 def openContact(ACCID):
-    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, L_window, teacheremail, supportemail
-    windows = [SU_window, LG_window, H_window, B_window, I_window, M_window, L_window]
+    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, teacheremail, supportemail
+    windows = [SU_window, LG_window, H_window, B_window, I_window, M_window, ]
 
     if C_window == None:
         C_window = tk.Toplevel(LG_window)
@@ -406,16 +401,17 @@ def openContact(ACCID):
         C_Exit_Button.place(x=0, y=375, width=150, height=75)
 
         C_TeacherLabel = Label(C_window, background="#FFFFFF", font=('Poppins', 30), foreground="#333333", justify="center",text="Gym teacher reference: ")
-        C_TeacherLabel.place(x=200, y=175, width=300, height=50)
+        C_TeacherLabel.place(x=175, y=175, width=325, height=50)
 
         C_SupportLabel = Label(C_window, background="#FFFFFF", font=('Poppins', 30), foreground="#333333", justify="center",text="Tech support reference: ")
-        C_SupportLabel.place(x=200, y=275, width=300, height=50)
+        C_SupportLabel.place(x=175, y=275, width=325, height=50)
 
         C_Teacher_Button = ttk.Button(C_window, style="Menu2.TButton",  text="Send message", command=lambda: Funcs.sendemail(teacheremail, ACCID, None))
         C_Teacher_Button.place(x=500, y=175, width=300, height=50)
 
         C_Support_Button = ttk.Button(C_window, style="Menu2.TButton",  text="Send message", command=lambda: Funcs.sendemail(supportemail, ACCID, None))
         C_Support_Button.place(x=500, y=275, width=300, height=50)
+
 
         C_window.after(60, closewindows, windows)
 
@@ -427,8 +423,8 @@ def openContact(ACCID):
         closewindows(windows)
 
 def openInduction(ACCID):
-    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, L_window
-    windows = [SU_window, LG_window, H_window, B_window, C_window, M_window, L_window]
+    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window
+    windows = [SU_window, LG_window, H_window, B_window, C_window, M_window, ]
 
     if I_window == None:
         I_window = tk.Toplevel(LG_window)
@@ -475,8 +471,8 @@ def openInduction(ACCID):
         closewindows(windows)
 
 def openMed(ACCID):
-    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, L_window
-    windows = [SU_window, LG_window, H_window, B_window, C_window, I_window, L_window]
+    global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window
+    windows = [SU_window, LG_window, H_window, B_window, C_window, I_window, ]
     closewindows(windows)
 
     if M_window == None:
@@ -536,8 +532,7 @@ def openMed(ACCID):
 # Startup
 
 if __name__ == "__main__":
-
+    Funcs.load_creds()
     Funcs.initialize_connection()
-    atexit.register(Funcs.close_connection)
     openlogin()
-
+    atexit.register(Funcs.close_connection)

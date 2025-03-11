@@ -12,16 +12,27 @@ from tkinter import filedialog
 from datetime import timedelta
 from datetime import datetime
 import os
-
+from dotenv import load_dotenv
+from cryptography.fernet import Fernet
+import sys
+import logging
 
 
 #Connection variables
+load_dotenv(dotenv_path="../../AppPacking/CLIENTAPP/.env")
+Ehost = os.getenv('DB_HOST')
+Euser = os.getenv('DB_USER')
+Epsw = os.getenv('DB_PASSWORD')
+Eatabase = os.getenv('DB_DATABASE')
+Eport = os.getenv('DB_PORT')
 
-host="sql7.freesqldatabase.com"
-user="sql7757512"
-database="sql7757512"
-port=3306
-psw="REDACTED"
+
+
+host = None
+user = None
+psw = None
+atabase = None
+port = ""
 cursor=None
 connection=None
 
@@ -33,12 +44,13 @@ def initialize_connection():
     global cursor
     global connection
     global host, user, database, port, psw
+    port=int(port)
     try:
         connection = mysql.connect(host=host, user=user, database=database, password=psw, port=port, connection_timeout=300)
         cursor = connection.cursor()
-
     except Exception as e:
-        message.showinfo("Connect failure", f"Error:{e}")
+        
+
         return None
 
 def close_connection():
@@ -64,6 +76,7 @@ def connect(query,params):
         return None
 
     try:
+        cursor.execute("SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED")
         cursor.execute(query,params)
         if query.strip().upper().startswith(("INSERT", "DELETE", "UPDATE")):
             connection.commit()
@@ -216,7 +229,7 @@ def signup(username, password, name, sur, logincallback):
 
     else:
 
-       connect("INSERT INTO Users VALUES (%s, %s, %s, %s, %s, FALSE)", (findid(), name, sur, username, password))
+       connect("INSERT INTO Users VALUES (%s, %s, %s, %s, %s, FALSE, FALSE)", (findid(), name, sur, username, password))
        message.showinfo("Insert status", "Sign-up successful")
        logincallback()
 
@@ -268,9 +281,9 @@ def sendemail(sendto, AccID, ind):
     system_platform = platform.system()
     try:
         if system_platform == "Windows":    # Windows
-            subprocess.run(['start', mail], shell=True, check=True)
-        elif system_platform == "Darwin":  # macOS
-            subprocess.run(['open', mail], check=True)
+            subprocess.run(["open", "-a", "Mail", mail], check=True)
+        elif system_platform == "Darwin":  # macos
+            subprocess.run(["open", "-a", "Mail", mail], check=True)
         else:
             message.showinfo("System error","This platform is not supported.")
     except subprocess.CalledProcessError as e:
@@ -286,11 +299,6 @@ def valiDate(date_str):
         return True
     except ValueError:
         return False
-
-def refresh(root,procedure):
-
-    root.destroy()
-    procedure()
 
 
 
@@ -356,3 +364,50 @@ def upload_file(entry,AccID):
                     message.showinfo("Upload faliure", "File too big (>2mb)")
             except Exception as e:
                 message.showinfo("Upload failure", f"Error:{e}")
+
+#Security functions
+
+"""def load_key():
+    key_file_path = "utf8_encoder.key"
+    if hasattr(sys, '_MEIPASS'):
+
+        key_file_path = os.path.join(sys._MEIPASS, key_file_path)
+    else:
+
+        key_file_path = os.path.join(os.getcwd(), key_file_path)
+    with open(key_file_path, "rb") as key_file:
+        return key_file.read()"""
+
+from dotenv import load_dotenv
+import os
+import sys
+
+def load_env():
+    app_path = os.path.dirname(os.path.abspath(__file__))
+    env_path = os.path.join(app_path, "..", "Resources", ".env")
+    env_path = os.path.abspath(env_path)
+    load_dotenv(env_path)
+
+def load_key():
+    """key_file = "REDACTED" """
+    key_file = os.getenv('DB_K')
+    return key_file
+
+def load_creds():
+    global host, user, psw, database, port
+    load_env()
+    key = load_key()
+    cipher = Fernet(key)
+
+
+    encrypted_host = os.getenv('DB_HOST')
+    encrypted_user = os.getenv('DB_USER')
+    encrypted_password = os.getenv('DB_PASSWORD')
+    encrypted_database = os.getenv('DB_DATABASE')
+    encrypted_port = os.getenv('DB_PORT')
+
+    host = cipher.decrypt(encrypted_host.encode()).decode()
+    user = cipher.decrypt(encrypted_user.encode()).decode()
+    psw = cipher.decrypt(encrypted_password.encode()).decode()
+    database = cipher.decrypt(encrypted_database.encode()).decode()
+    port = cipher.decrypt(encrypted_port.encode()).decode()
