@@ -2,8 +2,7 @@
 
 
 # Importing libraries
-
-import time
+# These libraries are required dependencies for some of the functions below
 from tkinter import *
 import Student_Libs as Funcs
 import tkinter as tk
@@ -12,7 +11,7 @@ import atexit
 
 
 # Startup variables
-
+# These variables are initialized beforehand to make the system orderly and also to make the program easier to translate to something like C++
 SU_window = None
 LG_window = None
 H_window = None
@@ -34,6 +33,7 @@ supportemail="rcapobianco@stlouisschoolapps.com"
 
 def setup_styles():
     global style
+    # This crucial function initializes the button styles for the entire application. This is required especially for the coloured booking timetable
     style = ttk.Style()
     style.theme_use('default')
     style.configure('Menu.TButton', background='#FFFFFF', foreground='#333333', padding=5)
@@ -77,6 +77,7 @@ def setup_styles():
               background=[('active', '#9c59b5'), ('pressed', 'black')])
 
 def closewindows(windows):
+    # This function withdraws any open window
     for i in range(len(windows)):
         try:
             windows[i].withdraw()
@@ -84,9 +85,9 @@ def closewindows(windows):
         except:
             pass
 
-
 def refresh_buttons(ACCID):
     global TTbuttons
+    #This function refreshes the timetable by individually configuring every button tstored in the TTbuttons 2d array
     for i in range(7):
         for o in range(5):
             btn = TTbuttons.get((i, o))
@@ -98,16 +99,15 @@ def refresh_buttons(ACCID):
                     text, style = Funcs.getTTstatus(i, o, ACCID)
                     btn.configure(text=text, style=style, state="normal")
 
-
-
 def QuitApp():
     global LG_window
+    # Pretty self explanatory, kills the toplevel window and therefore the whole app collaplses and shuts down
     LG_window.destroy()
 
 def openlogin():
     global SU_window, LG_window, H_window, B_window, C_window, I_window, style
     windows = [SU_window, H_window, B_window, C_window, I_window, ]
-
+    # This function opens the login window GUI or, if already stored, shows it. It then hides the previous window to give an idea of continuity
     if LG_window is None:
         LG_window = tk.Tk()
         setup_styles()
@@ -160,7 +160,7 @@ def openlogin():
 def opensignup():
     global SU_window, LG_window, H_window, B_window, C_window, I_window, style
     windows = [LG_window, H_window, B_window, C_window, I_window, M_window, ]
-
+    # This function opens the signup window GUI or, if already stored, shows it. It then hides the previous window to give an idea of continuity
     if SU_window is None:
         SU_window = tk.Toplevel(LG_window)
         setup_styles()
@@ -227,7 +227,7 @@ def opensignup():
 def openHome(ACCID):
     global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, H_IND_Status_Label,H_Med_Status_Label
     windows = [SU_window, LG_window, B_window, C_window, I_window, M_window, ]
-
+    # This function opens the Home window GUI or, if already stored, shows it. It then hides the previous window to give an idea of continuity
     if H_window == None:
         H_window = tk.Toplevel(LG_window)
         SpawnX = int((H_window.winfo_screenwidth() / 2)-(900/2))
@@ -294,7 +294,8 @@ def openHome(ACCID):
 def openBook(ACCID):
     global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, TTbuttons
     windows = [SU_window, LG_window, H_window, C_window, I_window, M_window, ]
-
+    # This function opens the Bookings window GUI or, if already stored, shows it. It then hides the previous window to give an idea of continuity
+    # This function is the core element of the app and uses a if statement with two double nested loops to create the timetable the first time. The buttons are then stored with my [i:o] coordinate system in a 2d array called TTbuttons
     if B_window == None:
         B_window = tk.Toplevel(LG_window)
         SpawnX = int((B_window.winfo_screenwidth() / 2)-(900/2))
@@ -368,7 +369,7 @@ def openBook(ACCID):
 def openContact(ACCID):
     global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window, teacheremail, supportemail
     windows = [SU_window, LG_window, H_window, B_window, I_window, M_window, ]
-
+    # This function opens the contact window GUI or, if already stored, shows it. It then hides the previous window to give an idea of continuity
     if C_window == None:
         C_window = tk.Toplevel(LG_window)
         SpawnX = int((C_window.winfo_screenwidth() / 2) - (900 / 2))
@@ -393,7 +394,6 @@ def openContact(ACCID):
         C_TMT_Button = ttk.Button(C_window, style="ToolB.TButton",  text="Bookings", command=lambda: openBook(ACCID))
         C_TMT_Button.place(x=0, y=225, width=150, height=75)
 
-        # Apply ToolBA.TButton style to the "Contact" button
         C_Contact_Button = ttk.Button(C_window, style="ToolBA.TButton",  text="Contact")
         C_Contact_Button.place(x=0, y=300, width=150, height=75)
 
@@ -425,7 +425,7 @@ def openContact(ACCID):
 def openInduction(ACCID):
     global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window
     windows = [SU_window, LG_window, H_window, B_window, C_window, M_window, ]
-
+    # This function opens the Induction window GUI or, if already stored, shows it. It then hides the previous window to give an idea of continuity
     if I_window == None:
         I_window = tk.Toplevel(LG_window)
         SpawnX = int((I_window.winfo_screenwidth() / 2) - (900 / 2))
@@ -474,7 +474,7 @@ def openMed(ACCID):
     global SU_window, LG_window, H_window, B_window, C_window, I_window, M_window
     windows = [SU_window, LG_window, H_window, B_window, C_window, I_window, ]
     closewindows(windows)
-
+    # This function opens the medical certificate window GUI or, if already stored, shows it. It then hides the previous window to give an idea of continuity
     if M_window == None:
         M_window = tk.Toplevel(LG_window)
         SpawnX = int((M_window.winfo_screenwidth() / 2) - (900 / 2))
@@ -536,3 +536,4 @@ if __name__ == "__main__":
     Funcs.initialize_connection()
     openlogin()
     atexit.register(Funcs.close_connection)
+    #Wilco, here the magic begins and the app starts, it loads creds for connecting, it connects, and it opens. It also tries to close the connection on closure but only if the app is closed properly

@@ -15,11 +15,21 @@ import os
 from dotenv import load_dotenv
 from cryptography.fernet import Fernet
 import sys
-import logging
 
+def load_env():
+    # This function is needed to load the .env file containing the encrypted credentials for connection. It is defined here as it has to be called as soon as possible. This is done so 12 lines below this.
+    if getattr(sys, 'frozen', False):
+
+        base_path = sys._MEIPASS
+        env_path = os.path.join(base_path, 'Resources', '.env')
+    else:
+        env_path = os.path.abspath("../../AppPacking/CLIENTAPP/.env")
+    if not os.path.exists(env_path):
+        raise FileNotFoundError(f"Filenotfound")
+    load_dotenv(dotenv_path=env_path)
 
 #Connection variables
-load_dotenv(dotenv_path="../../AppPacking/CLIENTAPP/.env")
+load_env()
 Ehost = os.getenv('DB_HOST')
 Euser = os.getenv('DB_USER')
 Epsw = os.getenv('DB_PASSWORD')
@@ -44,6 +54,7 @@ def initialize_connection():
     global cursor
     global connection
     global host, user, database, port, psw
+    # Here the app tries to connect to the server and set up a cursor. This cursor is kept for the length of the section to limit lag and resource usage
     port=int(port)
     try:
         connection = mysql.connect(host=host, user=user, database=database, password=psw, port=port, connection_timeout=300)
@@ -56,6 +67,7 @@ def initialize_connection():
 def close_connection():
     global connection
     global cursor
+    # Here the app closes the connection by force closing connection and cursor. This is the CORRECT way to close the app however if the app is forcequit it wont trigger. Anyways any connection times out after 8h
     if connection:
         connection.close()
 
@@ -65,7 +77,7 @@ def close_connection():
 def connect(query,params):
     global cursor
     global connection
-
+    # This is the backbone of the whole backend of the app. This function takes the query and the parametres of the query separately (to prevent SQL injection attacks) before executing and returning values (if necessary)
 
     try:
         if not connection.is_connected():
@@ -93,7 +105,7 @@ def connect(query,params):
 #Checking/status functions
 
 def isweekend(date_str):
-
+    # This function checks if a date is a weekend day, used for the timetable
     date_obj = datetime.strptime(date_str, '%Y-%m-%d')
     day_of_week = date_obj.weekday()
     if day_of_week < 5:
@@ -102,7 +114,7 @@ def isweekend(date_str):
         return False
 
 def checkpresent(username):
-
+    # This function prevents a user from utlilizing the same mail twice for making two accounts
    try:
        record = connect("SELECT Email FROM Users WHERE Email = %s", (username,))
        return record
@@ -111,8 +123,8 @@ def checkpresent(username):
        return None
 
 def findid():
+    # This function makes an accountID primary key dynamically by adding one to the biggest ID in the server
     try:
-
         result = connect("SELECT AccID FROM Users ORDER BY AccID DESC LIMIT 1", ())
         if result and result[0] is not None:
             biggest_id = int(result[0])
@@ -124,19 +136,20 @@ def findid():
     return biggest_id + 1
 
 def IDtoName(ACCID):
-
+    # This function gets the name of the owner of this account
     Name = connect("SELECT Name, Surname FROM Users WHERE AccID = %s", (ACCID,))[0]
     Surname = connect("SELECT Name, Surname FROM Users WHERE AccID = %s", (ACCID,))[1]
 
     return Name,Surname
 
 def getday(adder):
+    # This function translated dynamically the coordinate system of the timetable to actual days
     today = datetime.today()
     future_date = today + timedelta(days=adder)
     return future_date.date()
 
 def getTTstatus(i,o,AccID):
-
+    # This function gets the status of the periods on both fullness and colour that the button should be
     result = connect("SELECT COUNT(*) AS count_entries FROM Timetable WHERE Period = %s AND Date = %s", (o, getday(i)))[0]
 
     present = connect("SELECT * from Timetable WHERE Period = %s AND Date = %s AND AccID = %s", (o, getday(i), AccID))
@@ -159,15 +172,16 @@ def getTTstatus(i,o,AccID):
     return result,style
 
 def MedStatus(AccID):
+    # This function retrieves the account's certificate's status and expiration time along with what colour the displayed label should be
     result=connect("SELECT Expiry FROM Certificates WHERE MedID = %s",(AccID,))
     if result == None:
-        return "Not submitted","red",True
+        return "Not submitted","red",False
     elif connect("SELECT Approved FROM Certificates WHERE MedID = %s",(AccID,))[0] == 0:
         return "Not yet approved", "lightblue", False
 
     else:
         result=result[0]
-        if getday(0) <= result <= getday(14):
+        if getday(0) <= result and result <= getday(14):
             return f"Expires in {(result-getday(0)).days} days", "yellow",True
 
         elif result < getday(0):
@@ -177,13 +191,14 @@ def MedStatus(AccID):
             return "Submitted", "green",True
 
 def IndStatus(AccID):
-
+    # This function does the same as the above but for the induction day wich is either done or not done
     if connect("SELECT Induction FROM Users WHERE AccID = %s",(AccID,))[0] == 0:
         return "Not completed","red",False
     else:
         return "Completed","green",True
 
 def checkteacher(AccID):
+    # This function checks to see if the account is teacher enabled and therefore can access teacher-only slots
     query = "SELECT Teacher FROM Users WHERE AccID = %s"
     params = (AccID,)
     result = connect(query,params)[0]
@@ -199,6 +214,7 @@ def checkteacher(AccID):
 
 def login(e_user, e_pass,open_home_callback):
     global loggeduser, AccID
+    # This function is required to log in. What it does is it compares credentials with the ones saved on the server and sees if they are valid. If yes it callbacks the homepage and opens it with the appropriate account
     username = e_user
     password = e_pass
     if username == "" or password == "":
@@ -219,7 +235,7 @@ def login(e_user, e_pass,open_home_callback):
             message.showinfo("Login status", f"SQL error: {e}")
 
 def signup(username, password, name, sur, logincallback):
-
+    # This function makes a user account if valid credentials are given and opens the login page if the signup is successful
     if username == "" or password == "":
         message.showinfo("Insert status", "Some fields are empty")
     elif checkpresent(username):
@@ -239,19 +255,19 @@ def signup(username, password, name, sur, logincallback):
 
 def TTBTN_press(i, o, AccID, button):
     if not checkteacher(AccID) and o >= 3:
-
+    # This function controls the main functionality of the app: booking periods. It does a host of checks to see if the account actually has permission to book the specific period
         message.showinfo("Teachercheck - Failed", "Error - Non teacher account")
         return
 
-    if not MedStatus(AccID)[2]:
+    elif not MedStatus(AccID)[2]:
         message.showinfo("Medcheck - Failed", "Error - Certificate invalid")
         return
 
-    if not IndStatus(AccID)[2]:
+    elif not IndStatus(AccID)[2]:
         message.showinfo("Indcheck - Failed", "Error - Induction not complete")
         return
 
-    if connect("SELECT COUNT(*) AS count_entries FROM Timetable WHERE Period = %s AND Date = %s", (o, getday(i)))[0] == 20:
+    elif connect("SELECT COUNT(*) AS count_entries FROM Timetable WHERE Period = %s AND Date = %s", (o, getday(i)))[0] == 20:
         message.showinfo("Fullcheck - Failed", "Error - period full")
         return
 
@@ -266,7 +282,7 @@ def TTBTN_press(i, o, AccID, button):
 def sendemail(sendto, AccID, ind):
     name = IDtoName(AccID)[0]
     surname = IDtoName(AccID)[1]
-
+    # This function opens up the system mailing app to contact either the gym manager directly or tech support (me in this case)
     if ind is None:
         subject = "Gym Manager Automated Support Request"
         body = f"{name} {surname} has sent a message:\n\n*Include message here*"
@@ -280,9 +296,9 @@ def sendemail(sendto, AccID, ind):
     mail = f"mailto:{sendto}?subject={subject_enc}&body={body_enc}"
     system_platform = platform.system()
     try:
-        if system_platform == "Windows":    # Windows
+        if system_platform == "Windows":
             subprocess.run(["open", "-a", "Mail", mail], check=True)
-        elif system_platform == "Darwin":  # macos
+        elif system_platform == "Darwin": 
             subprocess.run(["open", "-a", "Mail", mail], check=True)
         else:
             message.showinfo("System error","This platform is not supported.")
@@ -290,6 +306,7 @@ def sendemail(sendto, AccID, ind):
         message.showinfo("System error",f"Failed to open email client: {e}")
 
 def valiDate(date_str):
+    # This function validates the date hence the funny name. It is used to see if the user inputted a valid date of expiry for the certificate
     try:
         date_obj = datetime.strptime(date_str, "%d/%m/%Y")
         today = datetime.now()
@@ -308,6 +325,7 @@ def valiDate(date_str):
 
 def select_file(button):
     global filepath
+    # This function opens the filedialog selector integrated with the OS to select a file. It also limits selection to pdf files
     file_path = filedialog.askopenfilename(title="Select an Image File",filetypes=[("PDF files", "*.pdf")])
 
     if file_path and file_path.endswith('.pdf'):
@@ -319,9 +337,8 @@ def select_file(button):
 
 def upload_file(entry,AccID):
     global filepath
+    # This function proceeds to actually add the certificate file to the server but it does so only after a date, presence, validity and size check are passed.
     date = entry.get()
-
-
 
     if not valiDate(date):
         message.showinfo("Upload failure", "No valid date (dd/mm/YYYY)")
@@ -367,39 +384,19 @@ def upload_file(entry,AccID):
 
 #Security functions
 
-"""def load_key():
-    key_file_path = "utf8_encoder.key"
-    if hasattr(sys, '_MEIPASS'):
-
-        key_file_path = os.path.join(sys._MEIPASS, key_file_path)
-    else:
-
-        key_file_path = os.path.join(os.getcwd(), key_file_path)
-    with open(key_file_path, "rb") as key_file:
-        return key_file.read()"""
-
-from dotenv import load_dotenv
-import os
-import sys
-
-def load_env():
-    app_path = os.path.dirname(os.path.abspath(__file__))
-    env_path = os.path.join(app_path, "..", "Resources", ".env")
-    env_path = os.path.abspath(env_path)
-    load_dotenv(env_path)
-
 def load_key():
-    """key_file = "REDACTED" """
+    # This function loads the key to decrypt the rest of the credentials
+    load_dotenv()
     key_file = os.getenv('DB_K')
     return key_file
 
 def load_creds():
     global host, user, psw, database, port
-    load_env()
+    # This function loads the credentials with the key retrieved above
     key = load_key()
     cipher = Fernet(key)
 
-
+    load_dotenv()
     encrypted_host = os.getenv('DB_HOST')
     encrypted_user = os.getenv('DB_USER')
     encrypted_password = os.getenv('DB_PASSWORD')
@@ -411,3 +408,4 @@ def load_creds():
     psw = cipher.decrypt(encrypted_password.encode()).decode()
     database = cipher.decrypt(encrypted_database.encode()).decode()
     port = cipher.decrypt(encrypted_port.encode()).decode()
+
